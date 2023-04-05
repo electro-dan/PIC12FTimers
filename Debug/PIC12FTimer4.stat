@@ -1,0 +1,19 @@
+// SourceBoost Linker Function Resource Usage Dump
+
+#GLOBAL:"global",line = 0,ram = 9.0,rom = 0;
+interrupt(void):"Z:\home\dan\PIC\PIC12FTimers\PIC12FTimer4.c",line = 19,ram = 1.0,rom = 47;
+ds3231Write(unsigned char,unsigned char):"Z:\home\dan\PIC\PIC12FTimers\PIC12FTimer4.c",line = 54,ram = 2.0,rom = 12;
+i2c_START(void):"C:\Program Files\SourceBoost\include\i2c_driver.h",line = 187,ram = 0.0,rom = 52;
+i2c_WRITE(unsigned char):"C:\Program Files\SourceBoost\include\i2c_driver.h",line = 447,ram = 3.1,rom = 81;
+i2c_STOP(void):"C:\Program Files\SourceBoost\include\i2c_driver.h",line = 367,ram = 0.0,rom = 47;
+ds3231Init(void):"Z:\home\dan\PIC\PIC12FTimers\PIC12FTimer4.c",line = 72,ram = 0.0,rom = 12;
+ds3231Start(void):"Z:\home\dan\PIC\PIC12FTimers\PIC12FTimer4.c",line = 84,ram = 0.0,rom = 6;
+ds3231Stop(void):"Z:\home\dan\PIC\PIC12FTimers\PIC12FTimer4.c",line = 88,ram = 0.0,rom = 7;
+ds3231WriteDate(void):"Z:\home\dan\PIC\PIC12FTimers\PIC12FTimer4.c",line = 92,ram = 0.0,rom = 22;
+initialise(void):"Z:\home\dan\PIC\PIC12FTimers\PIC12FTimer4.c",line = 107,ram = 0.0,rom = 49;
+i2c_INIT(unsigned char):"C:\Program Files\SourceBoost\include\i2c_driver.h",line = 660,ram = 1.0,rom = 19;
+main(void):"Z:\home\dan\PIC\PIC12FTimers\PIC12FTimer4.c",line = 168,ram = 0.0,rom = 68;
+delay_us(unsigned char):"NoSourceFile",line = 0,ram = 0.0,rom = 10;
+_startup(void):"NoSourceFile",line = 0,ram = 0.0,rom = 3;
+#HEAP_BLOCK: 0, 72, 23;
+#HEAP_BLOCK: 1, 47, 17;

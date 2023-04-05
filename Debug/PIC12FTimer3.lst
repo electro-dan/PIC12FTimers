@@ -1,0 +1,268 @@
+;/////////////////////////////////////////////////////////////////////////////////
+;// Code Generator: BoostC Compiler - http://www.sourceboost.com
+;// Version       : 8.01
+;// License Type  : Pro License
+;// Limitations   : PIC12,PIC16 max code size:Unlimited, max RAM banks:Unlimited
+;/////////////////////////////////////////////////////////////////////////////////
+
+	ORG 0x00000000
+0000  28AE  	GOTO	_startup
+	ORG 0x00000004
+0004  00DF  	MOVWF Int1Context
+0005  0E03  	SWAPF STATUS, W
+0006  1283  	BCF STATUS, RP0
+0007  00A0  	MOVWF Int1BContext
+0008  0E0A  	SWAPF PCLATH, W
+0009  00A1  	MOVWF Int1BContext+D'1'
+000A  0E04  	SWAPF FSR, W
+000B  00A2  	MOVWF Int1BContext+D'2'
+000C  118A  	BCF PCLATH,3
+000D  120A  	BCF PCLATH,4
+000E  28B1  	GOTO	interrupt
+	ORG 0x00000010
+0010        initialise_00000
+0010        ; { initialise ; function begin
+0010  3008  	MOVLW 0x08
+0011  1683  	BSF STATUS, RP0
+0012  0085  	MOVWF gbl_trisio
+0013  1283  	BCF STATUS, RP0
+0014  0085  	MOVWF gbl_gpio
+0015  1683  	BSF STATUS, RP0
+0016  019F  	CLRF gbl_ansel
+0017  3007  	MOVLW 0x07
+0018  1283  	BCF STATUS, RP0
+0019  0099  	MOVWF gbl_cmcon
+001A  3011  	MOVLW 0x11
+001B  1683  	BSF STATUS, RP0
+001C  0081  	MOVWF gbl_option_reg
+001D  303D  	MOVLW 0x3D
+001E  1283  	BCF STATUS, RP0
+001F  0081  	MOVWF gbl_tmr0
+0020  3006  	MOVLW 0x06
+0021  0090  	MOVWF gbl_t1con
+0022  30FF  	MOVLW 0xFF
+0023  008F  	MOVWF gbl_tmr1h
+0024  30CE  	MOVLW 0xCE
+0025  008E  	MOVWF gbl_tmr1l
+0026  1683  	BSF STATUS, RP0
+0027  140C  	BSF gbl_pie1,0
+0028  1596  	BSF gbl_ioc,3
+0029  1283  	BCF STATUS, RP0
+002A  158B  	BSF gbl_intcon,3
+002B  01A6  	CLRF gbl_cTask
+002C  01A7  	CLRF gbl_iDebounceCounter
+002D  01A5  	CLRF gbl_iSetTime
+002E  01A3  	CLRF gbl_iSec
+002F  01A4  	CLRF gbl_iMin
+0030  178B  	BSF gbl_intcon,7
+0031  170B  	BSF gbl_intcon,6
+0032  0008  	RETURN
+0033        ; } initialise function end
+
+	ORG 0x00000033
+0033        main
+0033        ; { main ; function begin
+0033  2010  	CALL initialise_00000
+0034        label1
+0034  1C26  	BTFSS gbl_cTask,0
+0035  283B  	GOTO	label2
+0036  303D  	MOVLW 0x3D
+0037  0081  	MOVWF gbl_tmr0
+0038  168B  	BSF gbl_intcon,5
+0039  1026  	BCF gbl_cTask,0
+003A  2878  	GOTO	label10
+003B        label2
+003B  1CA6  	BTFSS gbl_cTask,1
+003C  2878  	GOTO	label10
+003D  0327  	DECF gbl_iDebounceCounter, W
+003E  1D03  	BTFSS STATUS,Z
+003F  286E  	GOTO	label8
+0040  1985  	BTFSC gbl_gpio,3
+0041  286E  	GOTO	label8
+0042  08A5  	MOVF gbl_iSetTime, F
+0043  1D03  	BTFSS STATUS,Z
+0044  284B  	GOTO	label3
+0045  3001  	MOVLW 0x01
+0046  00A5  	MOVWF gbl_iSetTime
+0047  1205  	BCF gbl_gpio,4
+0048  1005  	BCF gbl_gpio,0
+0049  1485  	BSF gbl_gpio,1
+004A  2862  	GOTO	label6
+004B        label3
+004B  0325  	DECF gbl_iSetTime, W
+004C  1D03  	BTFSS STATUS,Z
+004D  2854  	GOTO	label4
+004E  3002  	MOVLW 0x02
+004F  00A5  	MOVWF gbl_iSetTime
+0050  1205  	BCF gbl_gpio,4
+0051  1405  	BSF gbl_gpio,0
+0052  1085  	BCF gbl_gpio,1
+0053  2862  	GOTO	label6
+0054        label4
+0054  0825  	MOVF gbl_iSetTime, W
+0055  3A02  	XORLW 0x02
+0056  1D03  	BTFSS STATUS,Z
+0057  285E  	GOTO	label5
+0058  3003  	MOVLW 0x03
+0059  00A5  	MOVWF gbl_iSetTime
+005A  1605  	BSF gbl_gpio,4
+005B  1005  	BCF gbl_gpio,0
+005C  1085  	BCF gbl_gpio,1
+005D  2862  	GOTO	label6
+005E        label5
+005E  01A5  	CLRF gbl_iSetTime
+005F  1205  	BCF gbl_gpio,4
+0060  1005  	BCF gbl_gpio,0
+0061  1085  	BCF gbl_gpio,1
+0062        label6
+0062  0825  	MOVF gbl_iSetTime, W
+0063  3C00  	SUBLW 0x00
+0064  1803  	BTFSC STATUS,C
+0065  2869  	GOTO	label7
+0066  1505  	BSF gbl_gpio,2
+0067  1410  	BSF gbl_t1con,0
+0068  2877  	GOTO	label9
+0069        label7
+0069  1105  	BCF gbl_gpio,2
+006A  01A3  	CLRF gbl_iSec
+006B  01A4  	CLRF gbl_iMin
+006C  1010  	BCF gbl_t1con,0
+006D  2877  	GOTO	label9
+006E        label8
+006E  0827  	MOVF gbl_iDebounceCounter, W
+006F  3C02  	SUBLW 0x02
+0070  1803  	BTFSC STATUS,C
+0071  2877  	GOTO	label9
+0072  1D85  	BTFSS gbl_gpio,3
+0073  2877  	GOTO	label9
+0074  158B  	BSF gbl_intcon,3
+0075  128B  	BCF gbl_intcon,5
+0076  01A7  	CLRF gbl_iDebounceCounter
+0077        label9
+0077  10A6  	BCF gbl_cTask,1
+0078        label10
+0078  1D26  	BTFSS gbl_cTask,2
+0079  28A6  	GOTO	label15
+007A  0824  	MOVF gbl_iMin, W
+007B  0225  	SUBWF gbl_iSetTime, W
+007C  00A8  	MOVWF CompTempVar548
+007D  0828  	MOVF CompTempVar548, W
+007E  3C02  	SUBLW 0x02
+007F  1803  	BTFSC STATUS,C
+0080  2887  	GOTO	label11
+0081  0805  	MOVF gbl_gpio, W
+0082  3A10  	XORLW 0x10
+0083  0085  	MOVWF gbl_gpio
+0084  1005  	BCF gbl_gpio,0
+0085  1085  	BCF gbl_gpio,1
+0086  2899  	GOTO	label13
+0087        label11
+0087  0824  	MOVF gbl_iMin, W
+0088  0225  	SUBWF gbl_iSetTime, W
+0089  00A9  	MOVWF CompTempVar549
+008A  0829  	MOVF CompTempVar549, W
+008B  3C01  	SUBLW 0x01
+008C  1803  	BTFSC STATUS,C
+008D  2894  	GOTO	label12
+008E  1205  	BCF gbl_gpio,4
+008F  0805  	MOVF gbl_gpio, W
+0090  3A01  	XORLW 0x01
+0091  0085  	MOVWF gbl_gpio
+0092  1085  	BCF gbl_gpio,1
+0093  2899  	GOTO	label13
+0094        label12
+0094  1205  	BCF gbl_gpio,4
+0095  1005  	BCF gbl_gpio,0
+0096  0805  	MOVF gbl_gpio, W
+0097  3A02  	XORLW 0x02
+0098  0085  	MOVWF gbl_gpio
+0099        label13
+0099  0825  	MOVF gbl_iSetTime, W
+009A  0224  	SUBWF gbl_iMin, W
+009B  1C03  	BTFSS STATUS,C
+009C  28A5  	GOTO	label14
+009D  1105  	BCF gbl_gpio,2
+009E  01A3  	CLRF gbl_iSec
+009F  01A4  	CLRF gbl_iMin
+00A0  01A5  	CLRF gbl_iSetTime
+00A1  1205  	BCF gbl_gpio,4
+00A2  1005  	BCF gbl_gpio,0
+00A3  1085  	BCF gbl_gpio,1
+00A4  1010  	BCF gbl_t1con,0
+00A5        label14
+00A5  1126  	BCF gbl_cTask,2
+00A6        label15
+00A6  1810  	BTFSC gbl_t1con,0
+00A7  2834  	GOTO	label1
+00A8  1A8B  	BTFSC gbl_intcon,5
+00A9  2834  	GOTO	label1
+00AA  158B  	BSF gbl_intcon,3
+00AB  0063  	SLEEP
+00AC  0000  	NOP
+00AD  2834  	GOTO	label1
+00AE        ; } main function end
+
+	ORG 0x000000AE
+00AE        _startup
+00AE  118A  	BCF PCLATH,3
+00AF  120A  	BCF PCLATH,4
+00B0  2833  	GOTO	main
+	ORG 0x000000B1
+00B1        interrupt
+00B1        ; { interrupt ; function begin
+00B1  1283  	BCF STATUS, RP0
+00B2  1C0B  	BTFSS gbl_intcon,0
+00B3  28BB  	GOTO	label17
+00B4  1D8B  	BTFSS gbl_intcon,3
+00B5  28BB  	GOTO	label17
+00B6  1426  	BSF gbl_cTask,0
+00B7  0805  	MOVF gbl_gpio, W
+00B8  00AA  	MOVWF interrupt_2_readgpio
+00B9  100B  	BCF gbl_intcon,0
+00BA  118B  	BCF gbl_intcon,3
+00BB        label17
+00BB  1D0B  	BTFSS gbl_intcon,2
+00BC  28C4  	GOTO	label18
+00BD  1E8B  	BTFSS gbl_intcon,5
+00BE  28C4  	GOTO	label18
+00BF  303D  	MOVLW 0x3D
+00C0  0081  	MOVWF gbl_tmr0
+00C1  0AA7  	INCF gbl_iDebounceCounter, F
+00C2  110B  	BCF gbl_intcon,2
+00C3  14A6  	BSF gbl_cTask,1
+00C4        label18
+00C4  1C0C  	BTFSS gbl_pir1,0
+00C5  28D7  	GOTO	label20
+00C6  1683  	BSF STATUS, RP0
+00C7  1C0C  	BTFSS gbl_pie1,0
+00C8  28D7  	GOTO	label20
+00C9  30FF  	MOVLW 0xFF
+00CA  1283  	BCF STATUS, RP0
+00CB  008F  	MOVWF gbl_tmr1h
+00CC  30CE  	MOVLW 0xCE
+00CD  008E  	MOVWF gbl_tmr1l
+00CE  0AA3  	INCF gbl_iSec, F
+00CF  303C  	MOVLW 0x3C
+00D0  0223  	SUBWF gbl_iSec, W
+00D1  1C03  	BTFSS STATUS,C
+00D2  28D5  	GOTO	label19
+00D3  0AA4  	INCF gbl_iMin, F
+00D4  01A3  	CLRF gbl_iSec
+00D5        label19
+00D5  100C  	BCF gbl_pir1,0
+00D6  1526  	BSF gbl_cTask,2
+00D7        label20
+00D7  1283  	BCF STATUS, RP0
+00D8  0E22  	SWAPF Int1BContext+D'2', W
+00D9  0084  	MOVWF FSR
+00DA  0E21  	SWAPF Int1BContext+D'1', W
+00DB  008A  	MOVWF PCLATH
+00DC  0E20  	SWAPF Int1BContext, W
+00DD  0083  	MOVWF STATUS
+00DE  0EDF  	SWAPF Int1Context, F
+00DF  0E5F  	SWAPF Int1Context, W
+00E0  0009  	RETFIE
+00E1        ; } interrupt function end
+
+	ORG 0x00002007
+2007  3FC4  	DW 0x3FC4

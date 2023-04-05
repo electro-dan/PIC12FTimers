@@ -1,0 +1,276 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.4	//
+ADCON0	C:\Program Files\SourceBoost\Include\pic12F675.h	37;"	d
+ADCS0	C:\Program Files\SourceBoost\Include\pic12F675.h	184;"	d
+ADCS1	C:\Program Files\SourceBoost\Include\pic12F675.h	183;"	d
+ADCS2	C:\Program Files\SourceBoost\Include\pic12F675.h	182;"	d
+ADFM	C:\Program Files\SourceBoost\Include\pic12F675.h	113;"	d
+ADIE	C:\Program Files\SourceBoost\Include\pic12F675.h	134;"	d
+ADIF	C:\Program Files\SourceBoost\Include\pic12F675.h	90;"	d
+ADON	C:\Program Files\SourceBoost\Include\pic12F675.h	120;"	d
+ADRESH	C:\Program Files\SourceBoost\Include\pic12F675.h	36;"	d
+ADRESL	C:\Program Files\SourceBoost\Include\pic12F675.h	51;"	d
+ANS0	C:\Program Files\SourceBoost\Include\pic12F675.h	188;"	d
+ANS1	C:\Program Files\SourceBoost\Include\pic12F675.h	187;"	d
+ANS2	C:\Program Files\SourceBoost\Include\pic12F675.h	186;"	d
+ANS3	C:\Program Files\SourceBoost\Include\pic12F675.h	185;"	d
+ANSEL	C:\Program Files\SourceBoost\Include\pic12F675.h	52;"	d
+BUTTON	PIC12FTimer3.h	17;"	d
+BYTE	C:\Program Files\SourceBoost\Include\novo.h	74;"	t
+C	C:\Program Files\SourceBoost\Include\pic12F675.h	62;"	d
+CAL0	C:\Program Files\SourceBoost\Include\pic12F675.h	149;"	d
+CAL1	C:\Program Files\SourceBoost\Include\pic12F675.h	148;"	d
+CAL2	C:\Program Files\SourceBoost\Include\pic12F675.h	147;"	d
+CAL3	C:\Program Files\SourceBoost\Include\pic12F675.h	146;"	d
+CAL4	C:\Program Files\SourceBoost\Include\pic12F675.h	145;"	d
+CAL5	C:\Program Files\SourceBoost\Include\pic12F675.h	144;"	d
+CHS0	C:\Program Files\SourceBoost\Include\pic12F675.h	116;"	d
+CHS1	C:\Program Files\SourceBoost\Include\pic12F675.h	115;"	d
+CINV	C:\Program Files\SourceBoost\Include\pic12F675.h	106;"	d
+CIS	C:\Program Files\SourceBoost\Include\pic12F675.h	107;"	d
+CM0	C:\Program Files\SourceBoost\Include\pic12F675.h	110;"	d
+CM1	C:\Program Files\SourceBoost\Include\pic12F675.h	109;"	d
+CM2	C:\Program Files\SourceBoost\Include\pic12F675.h	108;"	d
+CMCON	C:\Program Files\SourceBoost\Include\pic12F675.h	35;"	d
+CMIE	C:\Program Files\SourceBoost\Include\pic12F675.h	135;"	d
+CMIF	C:\Program Files\SourceBoost\Include\pic12F675.h	91;"	d
+COUT	C:\Program Files\SourceBoost\Include\pic12F675.h	105;"	d
+DC	C:\Program Files\SourceBoost\Include\pic12F675.h	61;"	d
+DTASK_HANDLE	C:\Program Files\SourceBoost\Include\novo.h	76;"	t
+EEADR	C:\Program Files\SourceBoost\Include\pic12F675.h	48;"	d
+EECON1	C:\Program Files\SourceBoost\Include\pic12F675.h	49;"	d
+EECON2	C:\Program Files\SourceBoost\Include\pic12F675.h	50;"	d
+EEDATA	C:\Program Files\SourceBoost\Include\pic12F675.h	47;"	d
+EEIE	C:\Program Files\SourceBoost\Include\pic12F675.h	133;"	d
+EEIF	C:\Program Files\SourceBoost\Include\pic12F675.h	89;"	d
+EN_TASK_STATUS	C:\Program Files\SourceBoost\Include\novo.h	97;"	g
+EVENT_HANDLE	C:\Program Files\SourceBoost\Include\novo.h	77;"	t
+EVENT_NO_TIMEOUT	C:\Program Files\SourceBoost\Include\novo.h	95;"	d
+EVENT_QUEUE_HEAD_OFFSET	C:\Program Files\SourceBoost\Include\novo.h	88;"	d
+F	C:\Program Files\SourceBoost\Include\pic12F675.h	20;"	d
+FLAG	C:\Program Files\SourceBoost\Include\novo.h	78;"	t
+FSR	C:\Program Files\SourceBoost\Include\pic12F675.h	27;"	d
+GIE	C:\Program Files\SourceBoost\Include\novo.h	61;"	d
+GIE	C:\Program Files\SourceBoost\Include\novo.h	68;"	d
+GIE	C:\Program Files\SourceBoost\Include\pic12F675.h	79;"	d
+GO	C:\Program Files\SourceBoost\Include\pic12F675.h	117;"	d
+GO_DONE	C:\Program Files\SourceBoost\Include\pic12F675.h	119;"	d
+GP0	C:\Program Files\SourceBoost\Include\pic12F675.h	75;"	d
+GP1	C:\Program Files\SourceBoost\Include\pic12F675.h	73;"	d
+GP2	C:\Program Files\SourceBoost\Include\pic12F675.h	71;"	d
+GP3	C:\Program Files\SourceBoost\Include\pic12F675.h	69;"	d
+GP4	C:\Program Files\SourceBoost\Include\pic12F675.h	67;"	d
+GP5	C:\Program Files\SourceBoost\Include\pic12F675.h	65;"	d
+GPIE	C:\Program Files\SourceBoost\Include\pic12F675.h	83;"	d
+GPIF	C:\Program Files\SourceBoost\Include\pic12F675.h	86;"	d
+GPIO	C:\Program Files\SourceBoost\Include\pic12F675.h	28;"	d
+GPIO0	C:\Program Files\SourceBoost\Include\pic12F675.h	76;"	d
+GPIO1	C:\Program Files\SourceBoost\Include\pic12F675.h	74;"	d
+GPIO2	C:\Program Files\SourceBoost\Include\pic12F675.h	72;"	d
+GPIO3	C:\Program Files\SourceBoost\Include\pic12F675.h	70;"	d
+GPIO4	C:\Program Files\SourceBoost\Include\pic12F675.h	68;"	d
+GPIO5	C:\Program Files\SourceBoost\Include\pic12F675.h	66;"	d
+GREEN	PIC12FTimer3.h	20;"	d
+HIBYTE	C:\Program Files\SourceBoost\Include\boostc.h	45;"	d
+INDF	C:\Program Files\SourceBoost\Include\pic12F675.h	23;"	d
+INTCON	C:\Program Files\SourceBoost\Include\pic12F675.h	30;"	d
+INTE	C:\Program Files\SourceBoost\Include\pic12F675.h	82;"	d
+INTEDG	C:\Program Files\SourceBoost\Include\pic12F675.h	124;"	d
+INTF	C:\Program Files\SourceBoost\Include\pic12F675.h	85;"	d
+IOC	C:\Program Files\SourceBoost\Include\pic12F675.h	44;"	d
+IOC0	C:\Program Files\SourceBoost\Include\pic12F675.h	165;"	d
+IOC1	C:\Program Files\SourceBoost\Include\pic12F675.h	164;"	d
+IOC2	C:\Program Files\SourceBoost\Include\pic12F675.h	163;"	d
+IOC3	C:\Program Files\SourceBoost\Include\pic12F675.h	162;"	d
+IOC4	C:\Program Files\SourceBoost\Include\pic12F675.h	161;"	d
+IOC5	C:\Program Files\SourceBoost\Include\pic12F675.h	160;"	d
+IOCB	C:\Program Files\SourceBoost\Include\pic12F675.h	45;"	d
+IOCB0	C:\Program Files\SourceBoost\Include\pic12F675.h	157;"	d
+IOCB1	C:\Program Files\SourceBoost\Include\pic12F675.h	156;"	d
+IOCB2	C:\Program Files\SourceBoost\Include\pic12F675.h	155;"	d
+IOCB3	C:\Program Files\SourceBoost\Include\pic12F675.h	154;"	d
+IOCB4	C:\Program Files\SourceBoost\Include\pic12F675.h	153;"	d
+IOCB5	C:\Program Files\SourceBoost\Include\pic12F675.h	152;"	d
+IRP	C:\Program Files\SourceBoost\Include\pic12F675.h	55;"	d
+LOBYTE	C:\Program Files\SourceBoost\Include\boostc.h	39;"	d
+MAINS_DLY	PIC12FTimer3.h	11;"	d
+MAINS_FREQ	PIC12FTimer3.h	10;"	d
+MAKESHORT	C:\Program Files\SourceBoost\Include\boostc.h	33;"	d
+MAX_EQ_INDEX	C:\Program Files\SourceBoost\Include\novo.h	92;"	d
+NOT_BOD	C:\Program Files\SourceBoost\Include\pic12F675.h	141;"	d
+NOT_DONE	C:\Program Files\SourceBoost\Include\pic12F675.h	118;"	d
+NOT_GPPU	C:\Program Files\SourceBoost\Include\pic12F675.h	123;"	d
+NOT_PD	C:\Program Files\SourceBoost\Include\pic12F675.h	59;"	d
+NOT_POR	C:\Program Files\SourceBoost\Include\pic12F675.h	140;"	d
+NOT_T1SYNC	C:\Program Files\SourceBoost\Include\pic12F675.h	100;"	d
+NOT_TO	C:\Program Files\SourceBoost\Include\pic12F675.h	58;"	d
+NULL	C:\Program Files\SourceBoost\Include\boostc.h	18;"	d
+OPTION_REG	C:\Program Files\SourceBoost\Include\pic12F675.h	38;"	d
+OSCCAL	C:\Program Files\SourceBoost\Include\pic12F675.h	42;"	d
+PCL	C:\Program Files\SourceBoost\Include\pic12F675.h	25;"	d
+PCLATH	C:\Program Files\SourceBoost\Include\pic12F675.h	29;"	d
+PCON	C:\Program Files\SourceBoost\Include\pic12F675.h	41;"	d
+PEIE	C:\Program Files\SourceBoost\Include\pic12F675.h	80;"	d
+PEND_EVENT_QUEUE_HEAD	C:\Program Files\SourceBoost\Include\novo.h	89;"	d
+PIE1	C:\Program Files\SourceBoost\Include\pic12F675.h	40;"	d
+PIR1	C:\Program Files\SourceBoost\Include\pic12F675.h	31;"	d
+PS0	C:\Program Files\SourceBoost\Include\pic12F675.h	130;"	d
+PS1	C:\Program Files\SourceBoost\Include\pic12F675.h	129;"	d
+PS2	C:\Program Files\SourceBoost\Include\pic12F675.h	128;"	d
+PSA	C:\Program Files\SourceBoost\Include\pic12F675.h	127;"	d
+QUEUE_HEADS	C:\Program Files\SourceBoost\Include\novo.h	81;"	d
+RD	C:\Program Files\SourceBoost\Include\pic12F675.h	179;"	d
+RED	PIC12FTimer3.h	18;"	d
+RELAY	PIC12FTimer3.h	16;"	d
+RP0	C:\Program Files\SourceBoost\Include\pic12F675.h	57;"	d
+RP1	C:\Program Files\SourceBoost\Include\pic12F675.h	56;"	d
+RUN_QUEUE_HEAD	C:\Program Files\SourceBoost\Include\novo.h	82;"	d
+SLEEP_QUEUE_HEAD	C:\Program Files\SourceBoost\Include\novo.h	83;"	d
+STATUS	C:\Program Files\SourceBoost\Include\pic12F675.h	26;"	d
+Scheduler	C:\Program Files\SourceBoost\Include\novo.h	154;"	t
+SysCreateTask	C:\Program Files\SourceBoost\Include\novo.h	186;"	d
+SysCriticalSectionBegin	C:\Program Files\SourceBoost\Include\novo.h	158;"	d
+SysCriticalSectionEnd	C:\Program Files\SourceBoost\Include\novo.h	162;"	d
+SysGetPriority	C:\Program Files\SourceBoost\Include\novo.h	204;"	d
+SysGetTaskStatus	C:\Program Files\SourceBoost\Include\novo.h	192;"	d
+SysReadSemaphore	C:\Program Files\SourceBoost\Include\novo.h	224;"	f
+SysSignalBinarySemaphore	C:\Program Files\SourceBoost\Include\novo.h	260;"	d
+SysSignalSemaphore	C:\Program Files\SourceBoost\Include\novo.h	217;"	d
+SysSignalSemaphoreIsr	C:\Program Files\SourceBoost\Include\novo.h	212;"	d
+SysWaitBinarySemaphore	C:\Program Files\SourceBoost\Include\novo.h	261;"	d
+SysWaitTimedOut	C:\Program Files\SourceBoost\Include\novo.h	245;"	d
+Sys_Sleep	C:\Program Files\SourceBoost\Include\novo.h	247;"	d
+Sys_StopTask	C:\Program Files\SourceBoost\Include\novo.h	194;"	d
+Sys_WaitSemaphore	C:\Program Files\SourceBoost\Include\novo.h	231;"	d
+T0CS	C:\Program Files\SourceBoost\Include\pic12F675.h	125;"	d
+T0IE	C:\Program Files\SourceBoost\Include\pic12F675.h	81;"	d
+T0IF	C:\Program Files\SourceBoost\Include\pic12F675.h	84;"	d
+T0SE	C:\Program Files\SourceBoost\Include\pic12F675.h	126;"	d
+T1CKPS0	C:\Program Files\SourceBoost\Include\pic12F675.h	98;"	d
+T1CKPS1	C:\Program Files\SourceBoost\Include\pic12F675.h	97;"	d
+T1CON	C:\Program Files\SourceBoost\Include\pic12F675.h	34;"	d
+T1IE	C:\Program Files\SourceBoost\Include\pic12F675.h	136;"	d
+T1IF	C:\Program Files\SourceBoost\Include\pic12F675.h	92;"	d
+T1OSCEN	C:\Program Files\SourceBoost\Include\pic12F675.h	99;"	d
+TASK_HANDLE	C:\Program Files\SourceBoost\Include\novo.h	75;"	t
+TASK_INT_IOC	PIC12FTimer3.h	13;"	d
+TASK_TIMER0	PIC12FTimer3.h	14;"	d
+TASK_TIMER1	PIC12FTimer3.h	15;"	d
+TIME1	PIC12FTimer3.h	21;"	d
+TIME2	PIC12FTimer3.h	22;"	d
+TIME3	PIC12FTimer3.h	23;"	d
+TMR0	C:\Program Files\SourceBoost\Include\pic12F675.h	24;"	d
+TMR0PRESET	PIC12FTimer3.h	28;"	d
+TMR1CS	C:\Program Files\SourceBoost\Include\pic12F675.h	101;"	d
+TMR1GE	C:\Program Files\SourceBoost\Include\pic12F675.h	96;"	d
+TMR1H	C:\Program Files\SourceBoost\Include\pic12F675.h	33;"	d
+TMR1HV	PIC12FTimer3.h	26;"	d
+TMR1IE	C:\Program Files\SourceBoost\Include\pic12F675.h	137;"	d
+TMR1IF	C:\Program Files\SourceBoost\Include\pic12F675.h	93;"	d
+TMR1L	C:\Program Files\SourceBoost\Include\pic12F675.h	32;"	d
+TMR1LV	PIC12FTimer3.h	27;"	d
+TMR1ON	C:\Program Files\SourceBoost\Include\pic12F675.h	102;"	d
+TRISIO	C:\Program Files\SourceBoost\Include\pic12F675.h	39;"	d
+TS_EVENT_TIMEOUT	C:\Program Files\SourceBoost\Include\novo.h	103;"	e	enum:EN_TASK_STATUS
+TS_IN_EVENT_Q	C:\Program Files\SourceBoost\Include\novo.h	102;"	e	enum:EN_TASK_STATUS
+TS_IN_RUN_Q	C:\Program Files\SourceBoost\Include\novo.h	100;"	e	enum:EN_TASK_STATUS
+TS_IN_SLEEP_Q	C:\Program Files\SourceBoost\Include\novo.h	101;"	e	enum:EN_TASK_STATUS
+TS_IS_WAKING	C:\Program Files\SourceBoost\Include\novo.h	104;"	e	enum:EN_TASK_STATUS
+TS_NOT_STOPPED	C:\Program Files\SourceBoost\Include\novo.h	99;"	e	enum:EN_TASK_STATUS
+VCFG	C:\Program Files\SourceBoost\Include\pic12F675.h	114;"	d
+VR0	C:\Program Files\SourceBoost\Include\pic12F675.h	173;"	d
+VR1	C:\Program Files\SourceBoost\Include\pic12F675.h	172;"	d
+VR2	C:\Program Files\SourceBoost\Include\pic12F675.h	171;"	d
+VR3	C:\Program Files\SourceBoost\Include\pic12F675.h	170;"	d
+VRCON	C:\Program Files\SourceBoost\Include\pic12F675.h	46;"	d
+VREN	C:\Program Files\SourceBoost\Include\pic12F675.h	168;"	d
+VRR	C:\Program Files\SourceBoost\Include\pic12F675.h	169;"	d
+W	C:\Program Files\SourceBoost\Include\pic12F675.h	19;"	d
+WPU	C:\Program Files\SourceBoost\Include\pic12F675.h	43;"	d
+WR	C:\Program Files\SourceBoost\Include\pic12F675.h	178;"	d
+WREN	C:\Program Files\SourceBoost\Include\pic12F675.h	177;"	d
+WRERR	C:\Program Files\SourceBoost\Include\pic12F675.h	176;"	d
+YELLOW	PIC12FTimer3.h	19;"	d
+Z	C:\Program Files\SourceBoost\Include\pic12F675.h	60;"	d
+_BODEN_OFF	C:\Program Files\SourceBoost\Include\pic12F675.h	201;"	d
+_BODEN_ON	C:\Program Files\SourceBoost\Include\pic12F675.h	200;"	d
+_BOOSTC_H_	C:\Program Files\SourceBoost\Include\boostc.h	14;"	d
+_CONFIG	C:\Program Files\SourceBoost\Include\pic12F675.h	220;"	d
+_CPD_OFF	C:\Program Files\SourceBoost\Include\pic12F675.h	197;"	d
+_CPD_ON	C:\Program Files\SourceBoost\Include\pic12F675.h	196;"	d
+_CP_OFF	C:\Program Files\SourceBoost\Include\pic12F675.h	199;"	d
+_CP_ON	C:\Program Files\SourceBoost\Include\pic12F675.h	198;"	d
+_EC_OSC	C:\Program Files\SourceBoost\Include\pic12F675.h	211;"	d
+_EEPROM	C:\Program Files\SourceBoost\Include\pic12F675.h	227;"	d
+_EXTRC_OSC_CLKOUT	C:\Program Files\SourceBoost\Include\pic12F675.h	215;"	d
+_EXTRC_OSC_NOCLKOUT	C:\Program Files\SourceBoost\Include\pic12F675.h	214;"	d
+_HS_OSC	C:\Program Files\SourceBoost\Include\pic12F675.h	210;"	d
+_INTRC_OSC_CLKOUT	C:\Program Files\SourceBoost\Include\pic12F675.h	213;"	d
+_INTRC_OSC_NOCLKOUT	C:\Program Files\SourceBoost\Include\pic12F675.h	212;"	d
+_LP_OSC	C:\Program Files\SourceBoost\Include\pic12F675.h	208;"	d
+_MCLRE_OFF	C:\Program Files\SourceBoost\Include\pic12F675.h	203;"	d
+_MCLRE_ON	C:\Program Files\SourceBoost\Include\pic12F675.h	202;"	d
+_NOVO_H_	C:\Program Files\SourceBoost\Include\novo.h	52;"	d
+_PIC12F675_H_	C:\Program Files\SourceBoost\Include\pic12F675.h	11;"	d
+_PIC12FTimer3_H_	PIC12FTimer3.h	8;"	d
+_PWRTE_OFF	C:\Program Files\SourceBoost\Include\pic12F675.h	204;"	d
+_PWRTE_ON	C:\Program Files\SourceBoost\Include\pic12F675.h	205;"	d
+_SYSTEM_H_	C:\Program Files\SourceBoost\Include\system.h	10;"	d
+_Scheduler	C:\Program Files\SourceBoost\Include\novo.h	108;"	s
+_WDT_OFF	C:\Program Files\SourceBoost\Include\pic12F675.h	207;"	d
+_WDT_ON	C:\Program Files\SourceBoost\Include\pic12F675.h	206;"	d
+_XT_OSC	C:\Program Files\SourceBoost\Include\pic12F675.h	209;"	d
+abs	C:\Program Files\SourceBoost\Include\boostc.h	29;"	d
+adcon0	C:\Program Files\SourceBoost\Include\pic12F675.h	243;"	v
+adresh	C:\Program Files\SourceBoost\Include\pic12F675.h	242;"	v
+adresl	C:\Program Files\SourceBoost\Include\pic12F675.h	257;"	v
+ansel	C:\Program Files\SourceBoost\Include\pic12F675.h	258;"	v
+cTask	PIC12FTimer3.h	33;"	v
+clear_bit	C:\Program Files\SourceBoost\Include\boostc.h	22;"	d
+clear_wdt	C:\Program Files\SourceBoost\Include\boostc.h	64;"	f
+cmcon	C:\Program Files\SourceBoost\Include\pic12F675.h	241;"	v
+eeadr	C:\Program Files\SourceBoost\Include\pic12F675.h	254;"	v
+eecon1	C:\Program Files\SourceBoost\Include\pic12F675.h	255;"	v
+eecon2	C:\Program Files\SourceBoost\Include\pic12F675.h	256;"	v
+eedata	C:\Program Files\SourceBoost\Include\pic12F675.h	253;"	v
+fsr	C:\Program Files\SourceBoost\Include\pic12F675.h	233;"	v
+gpio	C:\Program Files\SourceBoost\Include\pic12F675.h	234;"	v
+iDebounceCounter	PIC12FTimer3.h	34;"	v
+iMin	PIC12FTimer3.h	31;"	v
+iSec	PIC12FTimer3.h	30;"	v
+iSetTime	PIC12FTimer3.h	32;"	v
+indf	C:\Program Files\SourceBoost\Include\pic12F675.h	229;"	v
+initialise	PIC12FTimer3.c	53;"	f
+intcon	C:\Program Files\SourceBoost\Include\novo.h	60;"	v
+intcon	C:\Program Files\SourceBoost\Include\novo.h	67;"	v
+intcon	C:\Program Files\SourceBoost\Include\pic12F675.h	236;"	v
+interrupt	PIC12FTimer3.c	17;"	f
+ioc	C:\Program Files\SourceBoost\Include\pic12F675.h	250;"	v
+iocb	C:\Program Files\SourceBoost\Include\pic12F675.h	251;"	v
+main	PIC12FTimer3.c	105;"	f
+nop	C:\Program Files\SourceBoost\Include\boostc.h	59;"	f
+option_reg	C:\Program Files\SourceBoost\Include\pic12F675.h	244;"	v
+osccal	C:\Program Files\SourceBoost\Include\pic12F675.h	248;"	v
+pcl	C:\Program Files\SourceBoost\Include\pic12F675.h	231;"	v
+pclath	C:\Program Files\SourceBoost\Include\pic12F675.h	235;"	v
+pcon	C:\Program Files\SourceBoost\Include\pic12F675.h	247;"	v
+pie1	C:\Program Files\SourceBoost\Include\pic12F675.h	246;"	v
+pir1	C:\Program Files\SourceBoost\Include\pic12F675.h	237;"	v
+reset	C:\Program Files\SourceBoost\Include\boostc.h	77;"	f
+reset	C:\Program Files\SourceBoost\Include\boostc.h	85;"	f
+set_bit	C:\Program Files\SourceBoost\Include\boostc.h	23;"	d
+sleep	C:\Program Files\SourceBoost\Include\boostc.h	69;"	f
+status	C:\Program Files\SourceBoost\Include\pic12F675.h	232;"	v
+t1con	C:\Program Files\SourceBoost\Include\pic12F675.h	240;"	v
+test_bit	C:\Program Files\SourceBoost\Include\boostc.h	24;"	d
+tmr0	C:\Program Files\SourceBoost\Include\pic12F675.h	230;"	v
+tmr1h	C:\Program Files\SourceBoost\Include\pic12F675.h	239;"	v
+tmr1l	C:\Program Files\SourceBoost\Include\pic12F675.h	238;"	v
+toggle_bit	C:\Program Files\SourceBoost\Include\boostc.h	25;"	d
+trisio	C:\Program Files\SourceBoost\Include\pic12F675.h	245;"	v
+vrcon	C:\Program Files\SourceBoost\Include\pic12F675.h	252;"	v
+wpu	C:\Program Files\SourceBoost\Include\pic12F675.h	249;"	v

@@ -1,0 +1,552 @@
+;/////////////////////////////////////////////////////////////////////////////////
+;// Code Generator: BoostC Compiler - http://www.sourceboost.com
+;// Version       : 8.01
+;// License Type  : Pro License
+;// Limitations   : PIC12,PIC16 max code size:Unlimited, max RAM banks:Unlimited
+;/////////////////////////////////////////////////////////////////////////////////
+
+	ORG 0x00000000
+0000  2991  	GOTO	_startup
+	ORG 0x00000004
+0004  00DF  	MOVWF Int1Context
+0005  0E03  	SWAPF STATUS, W
+0006  1283  	BCF STATUS, RP0
+0007  00A0  	MOVWF Int1BContext
+0008  0E0A  	SWAPF PCLATH, W
+0009  00A1  	MOVWF Int1BContext+D'1'
+000A  0E04  	SWAPF FSR, W
+000B  00A2  	MOVWF Int1BContext+D'2'
+000C  118A  	BCF PCLATH,3
+000D  120A  	BCF PCLATH,4
+000E  2994  	GOTO	interrupt
+	ORG 0x00000010
+0010        delay_us_00000
+0010        ; { delay_us ; function begin
+0010  3003  	MOVLW 0x03
+0011  07AD  	ADDWF delay_us_00000_arg_del, F
+0012  0CAD  	RRF delay_us_00000_arg_del, F
+0013  0CAD  	RRF delay_us_00000_arg_del, F
+0014  307F  	MOVLW 0x7F
+0015  05AD  	ANDWF delay_us_00000_arg_del, F
+0016        label1
+0016  0000  	NOP
+0017  0BAD  	DECFSZ delay_us_00000_arg_del, F
+0018  2816  	GOTO	label1
+0019  0008  	RETURN
+001A        ; } delay_us function end
+
+	ORG 0x0000001A
+001A        i2c_WRITE_00000
+001A        ; { i2c_WRITE ; function begin
+001A  11C6  	BCF i2c_WRITE_00000_1_l_bclif,3
+001B  11C5  	BCF i2c_WRITE_00000_1_l_sspif,3
+001C  13C0  	BCF i2c_WRITE_00000_1_l_wcol,7
+001D  082A  	MOVF i2c_WRITE_00000_arg_i2c_data, W
+001E  00C4  	MOVWF i2c_WRITE_00000_1_i2c_SSPBUF
+001F  1005  	BCF i2c_WRITE_00000_1_l_scl,0
+0020  1085  	BCF i2c_WRITE_00000_1_l_sda,1
+0021  1142  	BCF i2c_WRITE_00000_1_l_rw,2
+0022  3080  	MOVLW 0x80
+0023  00AB  	MOVWF i2c_WRITE_00000_1_BitMask
+0024        label2
+0024  08AB  	MOVF i2c_WRITE_00000_1_BitMask, F
+0025  1903  	BTFSC STATUS,Z
+0026  2847  	GOTO	label7
+0027  082B  	MOVF i2c_WRITE_00000_1_BitMask, W
+0028  052A  	ANDWF i2c_WRITE_00000_arg_i2c_data, W
+0029  1903  	BTFSC STATUS,Z
+002A  282E  	GOTO	label3
+002B  1683  	BSF STATUS, RP0
+002C  1485  	BSF i2c_WRITE_00000_1_l_sda_tris,1
+002D  2830  	GOTO	label4
+002E        label3
+002E  1683  	BSF STATUS, RP0
+002F  1085  	BCF i2c_WRITE_00000_1_l_sda_tris,1
+0030        label4
+0030  300A  	MOVLW 0x0A
+0031  1283  	BCF STATUS, RP0
+0032  00AD  	MOVWF delay_us_00000_arg_del
+0033  2010  	CALL delay_us_00000
+0034  1683  	BSF STATUS, RP0
+0035  1405  	BSF i2c_WRITE_00000_1_l_scl_tris,0
+0036        label5
+0036  1283  	BCF STATUS, RP0
+0037  1805  	BTFSC i2c_WRITE_00000_1_l_scl,0
+0038  283B  	GOTO	label6
+0039  0064  	CLRWDT
+003A  2836  	GOTO	label5
+003B        label6
+003B  300A  	MOVLW 0x0A
+003C  00AD  	MOVWF delay_us_00000_arg_del
+003D  2010  	CALL delay_us_00000
+003E  1683  	BSF STATUS, RP0
+003F  1005  	BCF i2c_WRITE_00000_1_l_scl_tris,0
+0040  300A  	MOVLW 0x0A
+0041  1283  	BCF STATUS, RP0
+0042  00AD  	MOVWF delay_us_00000_arg_del
+0043  2010  	CALL delay_us_00000
+0044  1003  	BCF STATUS,C
+0045  0CAB  	RRF i2c_WRITE_00000_1_BitMask, F
+0046  2824  	GOTO	label2
+0047        label7
+0047  15C5  	BSF i2c_WRITE_00000_1_l_sspif,3
+0048  1641  	BSF i2c_WRITE_00000_1_l_acken,4
+0049  12C1  	BCF i2c_WRITE_00000_1_l_ackdt,5
+004A  1683  	BSF STATUS, RP0
+004B  1485  	BSF i2c_WRITE_00000_1_l_sda_tris,1
+004C  300A  	MOVLW 0x0A
+004D  1283  	BCF STATUS, RP0
+004E  00AD  	MOVWF delay_us_00000_arg_del
+004F  2010  	CALL delay_us_00000
+0050  1683  	BSF STATUS, RP0
+0051  1405  	BSF i2c_WRITE_00000_1_l_scl_tris,0
+0052        label8
+0052  1283  	BCF STATUS, RP0
+0053  1805  	BTFSC i2c_WRITE_00000_1_l_scl,0
+0054  2857  	GOTO	label9
+0055  0064  	CLRWDT
+0056  2852  	GOTO	label8
+0057        label9
+0057  300A  	MOVLW 0x0A
+0058  00AD  	MOVWF delay_us_00000_arg_del
+0059  2010  	CALL delay_us_00000
+005A  102C  	BCF i2c_WRITE_00000_1_local_ack,0
+005B  1885  	BTFSC i2c_WRITE_00000_1_l_sda,1
+005C  142C  	BSF i2c_WRITE_00000_1_local_ack,0
+005D  300A  	MOVLW 0x0A
+005E  00AD  	MOVWF delay_us_00000_arg_del
+005F  2010  	CALL delay_us_00000
+0060  1683  	BSF STATUS, RP0
+0061  1005  	BCF i2c_WRITE_00000_1_l_scl_tris,0
+0062  1283  	BCF STATUS, RP0
+0063  1241  	BCF i2c_WRITE_00000_1_l_acken,4
+0064  300A  	MOVLW 0x0A
+0065  00AD  	MOVWF delay_us_00000_arg_del
+0066  2010  	CALL delay_us_00000
+0067  01AD  	CLRF CompTempVarRet548
+0068  182C  	BTFSC i2c_WRITE_00000_1_local_ack,0
+0069  0AAD  	INCF CompTempVarRet548, F
+006A  0008  	RETURN
+006B        ; } i2c_WRITE function end
+
+	ORG 0x0000006B
+006B        i2c_STOP_00000
+006B        ; { i2c_STOP ; function begin
+006B  1283  	BCF STATUS, RP0
+006C  11C6  	BCF i2c_STOP_00000_1_l_bclif,3
+006D  11C5  	BCF i2c_STOP_00000_1_l_sspif,3
+006E  1541  	BSF i2c_STOP_00000_1_l_pen,2
+006F  300A  	MOVLW 0x0A
+0070  00AD  	MOVWF delay_us_00000_arg_del
+0071  2010  	CALL delay_us_00000
+0072  1005  	BCF i2c_STOP_00000_1_l_scl,0
+0073  1085  	BCF i2c_STOP_00000_1_l_sda,1
+0074  1683  	BSF STATUS, RP0
+0075  1005  	BCF i2c_STOP_00000_1_l_scl_tris,0
+0076  1085  	BCF i2c_STOP_00000_1_l_sda_tris,1
+0077  300A  	MOVLW 0x0A
+0078  1283  	BCF STATUS, RP0
+0079  00AD  	MOVWF delay_us_00000_arg_del
+007A  2010  	CALL delay_us_00000
+007B  1683  	BSF STATUS, RP0
+007C  1405  	BSF i2c_STOP_00000_1_l_scl_tris,0
+007D        label10
+007D  1283  	BCF STATUS, RP0
+007E  1805  	BTFSC i2c_STOP_00000_1_l_scl,0
+007F  2882  	GOTO	label11
+0080  0064  	CLRWDT
+0081  287D  	GOTO	label10
+0082        label11
+0082  300A  	MOVLW 0x0A
+0083  00AD  	MOVWF delay_us_00000_arg_del
+0084  2010  	CALL delay_us_00000
+0085  1683  	BSF STATUS, RP0
+0086  1485  	BSF i2c_STOP_00000_1_l_sda_tris,1
+0087  300A  	MOVLW 0x0A
+0088  1283  	BCF STATUS, RP0
+0089  00AD  	MOVWF delay_us_00000_arg_del
+008A  2010  	CALL delay_us_00000
+008B  1C85  	BTFSS i2c_STOP_00000_1_l_sda,1
+008C  288F  	GOTO	label12
+008D  1805  	BTFSC i2c_STOP_00000_1_l_scl,0
+008E  2893  	GOTO	label13
+008F        label12
+008F  15C6  	BSF i2c_STOP_00000_1_l_bclif,3
+0090  11C2  	BCF i2c_STOP_00000_1_l_s,3
+0091  1141  	BCF i2c_STOP_00000_1_l_pen,2
+0092  0008  	RETURN
+0093        label13
+0093  1642  	BSF i2c_STOP_00000_1_l_p,4
+0094  1141  	BCF i2c_STOP_00000_1_l_pen,2
+0095  1041  	BCF i2c_STOP_00000_1_l_sen,0
+0096  10C1  	BCF i2c_STOP_00000_1_l_rsen,1
+0097  11C1  	BCF i2c_STOP_00000_1_l_rcen,3
+0098  1241  	BCF i2c_STOP_00000_1_l_acken,4
+0099  0008  	RETURN
+009A        ; } i2c_STOP function end
+
+	ORG 0x0000009A
+009A        i2c_START_00000
+009A        ; { i2c_START ; function begin
+009A  300A  	MOVLW 0x0A
+009B  1283  	BCF STATUS, RP0
+009C  00AD  	MOVWF delay_us_00000_arg_del
+009D  2010  	CALL delay_us_00000
+009E  11C6  	BCF i2c_START_00000_1_l_bclif,3
+009F  11C5  	BCF i2c_START_00000_1_l_sspif,3
+00A0  1441  	BSF i2c_START_00000_1_l_sen,0
+00A1  1683  	BSF STATUS, RP0
+00A2  1405  	BSF i2c_START_00000_1_l_scl_tris,0
+00A3  1485  	BSF i2c_START_00000_1_l_sda_tris,1
+00A4  1283  	BCF STATUS, RP0
+00A5  1005  	BCF i2c_START_00000_1_l_scl,0
+00A6  1085  	BCF i2c_START_00000_1_l_sda,1
+00A7  1C05  	BTFSS i2c_START_00000_1_l_scl,0
+00A8  28C6  	GOTO	label15
+00A9  1C85  	BTFSS i2c_START_00000_1_l_sda,1
+00AA  28C6  	GOTO	label15
+00AB  300A  	MOVLW 0x0A
+00AC  00AD  	MOVWF delay_us_00000_arg_del
+00AD  2010  	CALL delay_us_00000
+00AE  1805  	BTFSC i2c_START_00000_1_l_scl,0
+00AF  28B4  	GOTO	label14
+00B0  15C6  	BSF i2c_START_00000_1_l_bclif,3
+00B1  15C2  	BSF i2c_START_00000_1_l_s,3
+00B2  1041  	BCF i2c_START_00000_1_l_sen,0
+00B3  0008  	RETURN
+00B4        label14
+00B4  1085  	BCF i2c_START_00000_1_l_sda,1
+00B5  1683  	BSF STATUS, RP0
+00B6  1085  	BCF i2c_START_00000_1_l_sda_tris,1
+00B7  300A  	MOVLW 0x0A
+00B8  1283  	BCF STATUS, RP0
+00B9  00AD  	MOVWF delay_us_00000_arg_del
+00BA  2010  	CALL delay_us_00000
+00BB  1005  	BCF i2c_START_00000_1_l_scl,0
+00BC  1683  	BSF STATUS, RP0
+00BD  1005  	BCF i2c_START_00000_1_l_scl_tris,0
+00BE  300A  	MOVLW 0x0A
+00BF  1283  	BCF STATUS, RP0
+00C0  00AD  	MOVWF delay_us_00000_arg_del
+00C1  2010  	CALL delay_us_00000
+00C2  15C2  	BSF i2c_START_00000_1_l_s,3
+00C3  1041  	BCF i2c_START_00000_1_l_sen,0
+00C4  15C5  	BSF i2c_START_00000_1_l_sspif,3
+00C5  0008  	RETURN
+00C6        label15
+00C6  15C6  	BSF i2c_START_00000_1_l_bclif,3
+00C7  15C2  	BSF i2c_START_00000_1_l_s,3
+00C8  1041  	BCF i2c_START_00000_1_l_sen,0
+00C9  10C1  	BCF i2c_START_00000_1_l_rsen,1
+00CA  1141  	BCF i2c_START_00000_1_l_pen,2
+00CB  11C1  	BCF i2c_START_00000_1_l_rcen,3
+00CC  1241  	BCF i2c_START_00000_1_l_acken,4
+00CD  0008  	RETURN
+00CE        ; } i2c_START function end
+
+	ORG 0x000000CE
+00CE        ds3231Writ_00013
+00CE        ; { ds3231Write ; function begin
+00CE  209A  	CALL i2c_START_00000
+00CF  30D0  	MOVLW 0xD0
+00D0  00AA  	MOVWF i2c_WRITE_00000_arg_i2c_data
+00D1  201A  	CALL i2c_WRITE_00000
+00D2  0828  	MOVF ds3231Writ_00013_arg_ds3231Reg, W
+00D3  00AA  	MOVWF i2c_WRITE_00000_arg_i2c_data
+00D4  201A  	CALL i2c_WRITE_00000
+00D5  0829  	MOVF ds3231Writ_00013_arg_byteOut, W
+00D6  00AA  	MOVWF i2c_WRITE_00000_arg_i2c_data
+00D7  201A  	CALL i2c_WRITE_00000
+00D8  206B  	CALL i2c_STOP_00000
+00D9  0008  	RETURN
+00DA        ; } ds3231Write function end
+
+	ORG 0x000000DA
+00DA        i2c_INIT_00000
+00DA        ; { i2c_INIT ; function begin
+00DA  1683  	BSF STATUS, RP0
+00DB  1485  	BSF i2c_INIT_00000_1_l_sda_tris,1
+00DC  1405  	BSF i2c_INIT_00000_1_l_scl_tris,0
+00DD  1283  	BCF STATUS, RP0
+00DE  01C0  	CLRF i2c_INIT_00000_1_i2c_SSPCON1
+00DF  0828  	MOVF i2c_INIT_00000_arg_i2c_divisor, W
+00E0  00C3  	MOVWF i2c_INIT_00000_1_i2c_SSPADD
+00E1  3008  	MOVLW 0x08
+00E2  00C0  	MOVWF i2c_INIT_00000_1_i2c_SSPCON1
+00E3  01C1  	CLRF i2c_INIT_00000_1_i2c_SSPCON2
+00E4  01C2  	CLRF i2c_INIT_00000_1_i2c_SSPSTAT
+00E5  17C2  	BSF i2c_INIT_00000_1_l_smp,7
+00E6  11C5  	BCF i2c_INIT_00000_1_l_sspif,3
+00E7  11C6  	BCF i2c_INIT_00000_1_l_bclif,3
+00E8  1085  	BCF i2c_INIT_00000_1_l_sda,1
+00E9  1005  	BCF i2c_INIT_00000_1_l_scl,0
+00EA  16C0  	BSF i2c_INIT_00000_1_l_sspen,5
+00EB  206B  	CALL i2c_STOP_00000
+00EC  0008  	RETURN
+00ED        ; } i2c_INIT function end
+
+	ORG 0x000000ED
+00ED        ds3231Writ_00015
+00ED        ; { ds3231WriteDate ; function begin
+00ED  209A  	CALL i2c_START_00000
+00EE  30D0  	MOVLW 0xD0
+00EF  00AA  	MOVWF i2c_WRITE_00000_arg_i2c_data
+00F0  201A  	CALL i2c_WRITE_00000
+00F1  01AA  	CLRF i2c_WRITE_00000_arg_i2c_data
+00F2  201A  	CALL i2c_WRITE_00000
+00F3  01AA  	CLRF i2c_WRITE_00000_arg_i2c_data
+00F4  201A  	CALL i2c_WRITE_00000
+00F5  01AA  	CLRF i2c_WRITE_00000_arg_i2c_data
+00F6  201A  	CALL i2c_WRITE_00000
+00F7  01AA  	CLRF i2c_WRITE_00000_arg_i2c_data
+00F8  201A  	CALL i2c_WRITE_00000
+00F9  3001  	MOVLW 0x01
+00FA  00AA  	MOVWF i2c_WRITE_00000_arg_i2c_data
+00FB  201A  	CALL i2c_WRITE_00000
+00FC  3001  	MOVLW 0x01
+00FD  00AA  	MOVWF i2c_WRITE_00000_arg_i2c_data
+00FE  201A  	CALL i2c_WRITE_00000
+00FF  01AA  	CLRF i2c_WRITE_00000_arg_i2c_data
+0100  201A  	CALL i2c_WRITE_00000
+0101  206B  	CALL i2c_STOP_00000
+0102  0008  	RETURN
+0103        ; } ds3231WriteDate function end
+
+	ORG 0x00000103
+0103        ds3231Init_00000
+0103        ; { ds3231Init ; function begin
+0103  300E  	MOVLW 0x0E
+0104  1283  	BCF STATUS, RP0
+0105  00A8  	MOVWF ds3231Writ_00013_arg_ds3231Reg
+0106  3080  	MOVLW 0x80
+0107  00A9  	MOVWF ds3231Writ_00013_arg_byteOut
+0108  20CE  	CALL ds3231Writ_00013
+0109  300F  	MOVLW 0x0F
+010A  00A8  	MOVWF ds3231Writ_00013_arg_ds3231Reg
+010B  3080  	MOVLW 0x80
+010C  00A9  	MOVWF ds3231Writ_00013_arg_byteOut
+010D  20CE  	CALL ds3231Writ_00013
+010E  0008  	RETURN
+010F        ; } ds3231Init function end
+
+	ORG 0x0000010F
+010F        initialise_00000
+010F        ; { initialise ; function begin
+010F  23FF  	CALL 0x000003FF
+0110  1283  	BCF STATUS, RP0
+0111  1683  	BSF gbl_status,5
+0112  1683  	BSF STATUS, RP0
+0113  0090  	MOVWF gbl_osccal
+0114  1283  	BCF STATUS, RP0
+0115  1283  	BCF gbl_status,5
+0116  302B  	MOVLW 0x2B
+0117  1683  	BSF STATUS, RP0
+0118  0085  	MOVWF gbl_trisio
+0119  3008  	MOVLW 0x08
+011A  1283  	BCF STATUS, RP0
+011B  0085  	MOVWF gbl_gpio
+011C  1683  	BSF STATUS, RP0
+011D  019F  	CLRF gbl_ansel
+011E  3007  	MOVLW 0x07
+011F  1283  	BCF STATUS, RP0
+0120  0099  	MOVWF gbl_cmcon
+0121  3011  	MOVLW 0x11
+0122  1683  	BSF STATUS, RP0
+0123  0081  	MOVWF gbl_option_reg
+0124  303D  	MOVLW 0x3D
+0125  1283  	BCF STATUS, RP0
+0126  0081  	MOVWF gbl_tmr0
+0127  3006  	MOVLW 0x06
+0128  0090  	MOVWF gbl_t1con
+0129  30FF  	MOVLW 0xFF
+012A  008F  	MOVWF gbl_tmr1h
+012B  008E  	MOVWF gbl_tmr1l
+012C  1683  	BSF STATUS, RP0
+012D  140C  	BSF gbl_pie1,0
+012E  1596  	BSF gbl_ioc,3
+012F  1283  	BCF STATUS, RP0
+0130  158B  	BSF gbl_intcon,3
+0131  01A6  	CLRF gbl_cTask
+0132  01A7  	CLRF gbl_iDebounceCounter
+0133  01A5  	CLRF gbl_iSetTime
+0134  01A3  	CLRF gbl_iSec
+0135  01A4  	CLRF gbl_iMin
+0136  3001  	MOVLW 0x01
+0137  00A8  	MOVWF i2c_INIT_00000_arg_i2c_divisor
+0138  118A  	BCF PCLATH,3
+0139  120A  	BCF PCLATH,4
+013A  20DA  	CALL i2c_INIT_00000
+013B  20ED  	CALL ds3231Writ_00015
+013C  2103  	CALL ds3231Init_00000
+013D  178B  	BSF gbl_intcon,7
+013E  170B  	BSF gbl_intcon,6
+013F  0008  	RETURN
+0140        ; } initialise function end
+
+	ORG 0x00000140
+0140        ds3231Stop_00000
+0140        ; { ds3231Stop ; function begin
+0140  300F  	MOVLW 0x0F
+0141  1283  	BCF STATUS, RP0
+0142  00A8  	MOVWF ds3231Writ_00013_arg_ds3231Reg
+0143  3080  	MOVLW 0x80
+0144  00A9  	MOVWF ds3231Writ_00013_arg_byteOut
+0145  20CE  	CALL ds3231Writ_00013
+0146  0008  	RETURN
+0147        ; } ds3231Stop function end
+
+	ORG 0x00000147
+0147        ds3231Star_00014
+0147        ; { ds3231Start ; function begin
+0147  300F  	MOVLW 0x0F
+0148  1283  	BCF STATUS, RP0
+0149  00A8  	MOVWF ds3231Writ_00013_arg_ds3231Reg
+014A  01A9  	CLRF ds3231Writ_00013_arg_byteOut
+014B  20CE  	CALL ds3231Writ_00013
+014C  0008  	RETURN
+014D        ; } ds3231Start function end
+
+	ORG 0x0000014D
+014D        main
+014D        ; { main ; function begin
+014D  210F  	CALL initialise_00000
+014E        label16
+014E  1C26  	BTFSS gbl_cTask,0
+014F  2955  	GOTO	label17
+0150  303D  	MOVLW 0x3D
+0151  0081  	MOVWF gbl_tmr0
+0152  168B  	BSF gbl_intcon,5
+0153  1026  	BCF gbl_cTask,0
+0154  2978  	GOTO	label21
+0155        label17
+0155  1CA6  	BTFSS gbl_cTask,1
+0156  2978  	GOTO	label21
+0157  0327  	DECF gbl_iDebounceCounter, W
+0158  1D03  	BTFSS STATUS,Z
+0159  296E  	GOTO	label19
+015A  1985  	BTFSC gbl_gpio,3
+015B  296E  	GOTO	label19
+015C  08A5  	MOVF gbl_iSetTime, F
+015D  1D03  	BTFSS STATUS,Z
+015E  2966  	GOTO	label18
+015F  3001  	MOVLW 0x01
+0160  00A5  	MOVWF gbl_iSetTime
+0161  2147  	CALL ds3231Star_00014
+0162  1605  	BSF gbl_gpio,4
+0163  1505  	BSF gbl_gpio,2
+0164  1410  	BSF gbl_t1con,0
+0165  2977  	GOTO	label20
+0166        label18
+0166  01A5  	CLRF gbl_iSetTime
+0167  1205  	BCF gbl_gpio,4
+0168  1105  	BCF gbl_gpio,2
+0169  01A3  	CLRF gbl_iSec
+016A  01A4  	CLRF gbl_iMin
+016B  1010  	BCF gbl_t1con,0
+016C  2140  	CALL ds3231Stop_00000
+016D  2977  	GOTO	label20
+016E        label19
+016E  0827  	MOVF gbl_iDebounceCounter, W
+016F  3C02  	SUBLW 0x02
+0170  1803  	BTFSC STATUS,C
+0171  2977  	GOTO	label20
+0172  1D85  	BTFSS gbl_gpio,3
+0173  2977  	GOTO	label20
+0174  158B  	BSF gbl_intcon,3
+0175  128B  	BCF gbl_intcon,5
+0176  01A7  	CLRF gbl_iDebounceCounter
+0177        label20
+0177  10A6  	BCF gbl_cTask,1
+0178        label21
+0178  1D26  	BTFSS gbl_cTask,2
+0179  2989  	GOTO	label23
+017A  0805  	MOVF gbl_gpio, W
+017B  3A10  	XORLW 0x10
+017C  0085  	MOVWF gbl_gpio
+017D  0825  	MOVF gbl_iSetTime, W
+017E  0224  	SUBWF gbl_iMin, W
+017F  1C03  	BTFSS STATUS,C
+0180  2988  	GOTO	label22
+0181  1105  	BCF gbl_gpio,2
+0182  01A3  	CLRF gbl_iSec
+0183  01A4  	CLRF gbl_iMin
+0184  01A5  	CLRF gbl_iSetTime
+0185  1205  	BCF gbl_gpio,4
+0186  1010  	BCF gbl_t1con,0
+0187  2140  	CALL ds3231Stop_00000
+0188        label22
+0188  1126  	BCF gbl_cTask,2
+0189        label23
+0189  1810  	BTFSC gbl_t1con,0
+018A  294E  	GOTO	label16
+018B  1A8B  	BTFSC gbl_intcon,5
+018C  294E  	GOTO	label16
+018D  158B  	BSF gbl_intcon,3
+018E  0063  	SLEEP
+018F  0000  	NOP
+0190  294E  	GOTO	label16
+0191        ; } main function end
+
+	ORG 0x00000191
+0191        _startup
+0191  118A  	BCF PCLATH,3
+0192  120A  	BCF PCLATH,4
+0193  294D  	GOTO	main
+	ORG 0x00000194
+0194        interrupt
+0194        ; { interrupt ; function begin
+0194  1283  	BCF STATUS, RP0
+0195  1C0B  	BTFSS gbl_intcon,0
+0196  299E  	GOTO	label25
+0197  1D8B  	BTFSS gbl_intcon,3
+0198  299E  	GOTO	label25
+0199  1426  	BSF gbl_cTask,0
+019A  0805  	MOVF gbl_gpio, W
+019B  00AE  	MOVWF interrupt_2_readgpio
+019C  100B  	BCF gbl_intcon,0
+019D  118B  	BCF gbl_intcon,3
+019E        label25
+019E  1D0B  	BTFSS gbl_intcon,2
+019F  29A7  	GOTO	label26
+01A0  1E8B  	BTFSS gbl_intcon,5
+01A1  29A7  	GOTO	label26
+01A2  303D  	MOVLW 0x3D
+01A3  0081  	MOVWF gbl_tmr0
+01A4  0AA7  	INCF gbl_iDebounceCounter, F
+01A5  110B  	BCF gbl_intcon,2
+01A6  14A6  	BSF gbl_cTask,1
+01A7        label26
+01A7  1C0C  	BTFSS gbl_pir1,0
+01A8  29B9  	GOTO	label28
+01A9  1683  	BSF STATUS, RP0
+01AA  1C0C  	BTFSS gbl_pie1,0
+01AB  29B9  	GOTO	label28
+01AC  30FF  	MOVLW 0xFF
+01AD  1283  	BCF STATUS, RP0
+01AE  008F  	MOVWF gbl_tmr1h
+01AF  008E  	MOVWF gbl_tmr1l
+01B0  0AA3  	INCF gbl_iSec, F
+01B1  303C  	MOVLW 0x3C
+01B2  0223  	SUBWF gbl_iSec, W
+01B3  1C03  	BTFSS STATUS,C
+01B4  29B7  	GOTO	label27
+01B5  0AA4  	INCF gbl_iMin, F
+01B6  01A3  	CLRF gbl_iSec
+01B7        label27
+01B7  100C  	BCF gbl_pir1,0
+01B8  1526  	BSF gbl_cTask,2
+01B9        label28
+01B9  1283  	BCF STATUS, RP0
+01BA  0E22  	SWAPF Int1BContext+D'2', W
+01BB  0084  	MOVWF FSR
+01BC  0E21  	SWAPF Int1BContext+D'1', W
+01BD  008A  	MOVWF PCLATH
+01BE  0E20  	SWAPF Int1BContext, W
+01BF  0083  	MOVWF STATUS
+01C0  0EDF  	SWAPF Int1Context, F
+01C1  0E5F  	SWAPF Int1Context, W
+01C2  0009  	RETFIE
+01C3        ; } interrupt function end
+
+	ORG 0x00002007
+2007  3FC4  	DW 0x3FC4

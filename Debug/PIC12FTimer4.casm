@@ -1,0 +1,1662 @@
+;/////////////////////////////////////////////////////////////////////////////////
+;// Code Generator: BoostC Compiler - http://www.sourceboost.com
+;// Version       : 8.01
+;// License Type  : Pro License
+;// Limitations   : PIC12,PIC16 max code size:Unlimited, max RAM banks:Unlimited
+;/////////////////////////////////////////////////////////////////////////////////
+
+/************************************************************************************************
+  Code from www.electro-dan.co.uk - please credit me
+  Free to use, modify and distribute
+  NO WARRANTY
+************************************************************************************************/
+
+#include <system.h>
+#include <i2c_driver.h>
+#include "PIC12FTimer4.h"
+
+//Target PIC12F675 configuration word
+#pragma DATA _CONFIG, _PWRTE_ON & _WDT_OFF & _INTRC_OSC_NOCLKOUT & _CPD_OFF & _CP_OFF & _MCLRE_OFF & _BODEN_ON
+
+//Set clock frequency
+#pragma CLOCK_FREQ	4000000
+
+void interrupt() {
+
+    // Handle interrupt-on-change - button press
+    if (intcon.GPIF && intcon.GPIE) {
+0194  1283  	BCF STATUS, RP0
+0195  1C0B  	BTFSS gbl_intcon,0
+0196  299E  	GOTO	label25
+0197  1D8B  	BTFSS gbl_intcon,3
+0198  299E  	GOTO	label25
+019E        label25
+
+        // Debounce - start timer0
+        cTask.TASK_INT_IOC = 1;
+0199  1426  	BSF gbl_cTask,0
+
+        // read gpio
+        char readgpio = gpio;
+019A  0805  	MOVF gbl_gpio, W
+019B  00AE  	MOVWF interrupt_2_readgpio
+
+        intcon.GPIF = 0; // Clear interrupt flag
+019C  100B  	BCF gbl_intcon,0
+
+        intcon.GPIE = 0; // Disable interrupt (for de-bouncing)
+019D  118B  	BCF gbl_intcon,3
+
+    }
+
+    // Handle timer0 interrupt - button debounce
+    if(intcon.T0IF && intcon.T0IE) {
+019E  1D0B  	BTFSS gbl_intcon,2
+019F  29A7  	GOTO	label26
+01A0  1E8B  	BTFSS gbl_intcon,5
+01A1  29A7  	GOTO	label26
+01A7        label26
+
+        tmr0 = TMR0PRESET; // preset for timer0 register
+01A2  303D  	MOVLW 0x3D
+01A3  0081  	MOVWF gbl_tmr0
+
+        iDebounceCounter++;
+01A4  0AA7  	INCF gbl_iDebounceCounter, F
+
+        intcon.T0IF = 0; // Clear interrupt flag
+01A5  110B  	BCF gbl_intcon,2
+
+        cTask.TASK_TIMER0 = 1;
+01A6  14A6  	BSF gbl_cTask,1
+
+    }
+    
+    // Handle timer1 interrupt - delay counter
+    if (pir1.TMR1IF && pie1.TMR1IE) {
+01A7  1C0C  	BTFSS gbl_pir1,0
+01A8  29B9  	GOTO	label28
+01A9  1683  	BSF STATUS, RP0
+01AA  1C0C  	BTFSS gbl_pie1,0
+01AB  29B9  	GOTO	label28
+01B9        label28
+
+        tmr1h = TMR1HV;      // preset for timer1 MSB register
+01AC  30FF  	MOVLW 0xFF
+01AD  1283  	BCF STATUS, RP0
+01AE  008F  	MOVWF gbl_tmr1h
+
+        tmr1l = TMR1LV;      // preset for timer1 LSB register
+01AF  008E  	MOVWF gbl_tmr1l
+
+
+        // Tick seconds
+        iSec++;
+01B0  0AA3  	INCF gbl_iSec, F
+
+        if (iSec >= 60) {
+01B1  303C  	MOVLW 0x3C
+01B2  0223  	SUBWF gbl_iSec, W
+01B3  1C03  	BTFSS STATUS,C
+01B4  29B7  	GOTO	label27
+01B7        label27
+
+            // Tick minutes
+            iMin++;
+01B5  0AA4  	INCF gbl_iMin, F
+
+            iSec = 0;
+01B6  01A3  	CLRF gbl_iSec
+
+        }
+        pir1.TMR1IF = 0;     // Clear interrupt flag
+01B7  100C  	BCF gbl_pir1,0
+
+        cTask.TASK_TIMER1 = 1;
+01B8  1526  	BSF gbl_cTask,2
+
+    }
+}
+01B9  1283  	BCF STATUS, RP0
+01BA  0E22  	SWAPF Int1BContext+D'2', W
+01BB  0084  	MOVWF FSR
+01BC  0E21  	SWAPF Int1BContext+D'1', W
+01BD  008A  	MOVWF PCLATH
+01BE  0E20  	SWAPF Int1BContext, W
+01BF  0083  	MOVWF STATUS
+01C0  0EDF  	SWAPF Int1Context, F
+01C1  0E5F  	SWAPF Int1Context, W
+01C2  0009  	RETFIE
+
+
+void ds3231Write(char ds3231Reg, char byteOut) {
+
+	i2c_start();
+00CE  209A  	CALL i2c_START_00000
+
+	i2c_write(ds3231_addr); // address + write
+00CF  30D0  	MOVLW 0xD0
+00D0  00AA  	MOVWF i2c_WRITE_00000_arg_i2c_data
+00D1  201A  	CALL i2c_WRITE_00000
+
+	i2c_write(ds3231Reg); // start at address
+00D2  0828  	MOVF ds3231Writ_00013_arg_ds3231Reg, W
+00D3  00AA  	MOVWF i2c_WRITE_00000_arg_i2c_data
+00D4  201A  	CALL i2c_WRITE_00000
+
+	i2c_write(byteOut); // start at address
+00D5  0829  	MOVF ds3231Writ_00013_arg_byteOut, W
+00D6  00AA  	MOVWF i2c_WRITE_00000_arg_i2c_data
+00D7  201A  	CALL i2c_WRITE_00000
+
+	i2c_stop();
+00D8  206B  	CALL i2c_STOP_00000
+
+}
+00D9  0008  	RETURN
+
+
+void ds3231Init() {
+
+	/* control register 0Eh
+    bit7 EOSC   Enable Oscillator (1 if oscillator must be stopped when on battery)
+    bit6 BBSQW  Battery Backed Square Wave
+    bit5 CONV   Convert temperature (1 forces a conversion NOW)
+    bit4 RS2    Rate select - frequency of square wave output
+    bit3 RS1    Rate select
+    bit2 INTCN  Interrupt control (1 for use of the alarms and to disable square wave)
+    bit1 A2IE   Alarm2 interrupt enable (1 to enable)
+    bit0 A1IE   Alarm1 interrupt enable (1 to enable)
+    */
+	ds3231Write(0x0E, 0x80);
+0103  300E  	MOVLW 0x0E
+0104  1283  	BCF STATUS, RP0
+0105  00A8  	MOVWF ds3231Writ_00013_arg_ds3231Reg
+0106  3080  	MOVLW 0x80
+0107  00A9  	MOVWF ds3231Writ_00013_arg_byteOut
+0108  20CE  	CALL ds3231Writ_00013
+
+	/* Status Register 0Fh
+    bit7 OSF     Oscillator Stop Flag
+    bit3 EN32kHz Enable 32kHz Output
+    bit2 BSY     Busy
+    bit1 A2F     Alarm 2 Flag
+    bit0 A1F     Alarm 1 Flag
+    */
+	ds3231Write(0x0F, 0x80);
+0109  300F  	MOVLW 0x0F
+010A  00A8  	MOVWF ds3231Writ_00013_arg_ds3231Reg
+010B  3080  	MOVLW 0x80
+010C  00A9  	MOVWF ds3231Writ_00013_arg_byteOut
+010D  20CE  	CALL ds3231Writ_00013
+
+}
+010E  0008  	RETURN
+
+
+void ds3231Start() {
+
+	ds3231Write(0x0F, 0x00);
+0147  300F  	MOVLW 0x0F
+0148  1283  	BCF STATUS, RP0
+0149  00A8  	MOVWF ds3231Writ_00013_arg_ds3231Reg
+014A  01A9  	CLRF ds3231Writ_00013_arg_byteOut
+014B  20CE  	CALL ds3231Writ_00013
+
+}
+014C  0008  	RETURN
+
+
+void ds3231Stop() {
+
+	ds3231Write(0x0F, 0x80);
+0140  300F  	MOVLW 0x0F
+0141  1283  	BCF STATUS, RP0
+0142  00A8  	MOVWF ds3231Writ_00013_arg_ds3231Reg
+0143  3080  	MOVLW 0x80
+0144  00A9  	MOVWF ds3231Writ_00013_arg_byteOut
+0145  20CE  	CALL ds3231Writ_00013
+
+}
+0146  0008  	RETURN
+
+
+void ds3231WriteDate() {
+
+	i2c_start();
+00ED  209A  	CALL i2c_START_00000
+
+	i2c_write(ds3231_addr); // address + write
+00EE  30D0  	MOVLW 0xD0
+00EF  00AA  	MOVWF i2c_WRITE_00000_arg_i2c_data
+00F0  201A  	CALL i2c_WRITE_00000
+
+	i2c_write(0); // start at address 0
+00F1  01AA  	CLRF i2c_WRITE_00000_arg_i2c_data
+00F2  201A  	CALL i2c_WRITE_00000
+
+	i2c_write(0); // seconds
+00F3  01AA  	CLRF i2c_WRITE_00000_arg_i2c_data
+00F4  201A  	CALL i2c_WRITE_00000
+
+	i2c_write(0); // minutes
+00F5  01AA  	CLRF i2c_WRITE_00000_arg_i2c_data
+00F6  201A  	CALL i2c_WRITE_00000
+
+	i2c_write(0); // hours
+00F7  01AA  	CLRF i2c_WRITE_00000_arg_i2c_data
+00F8  201A  	CALL i2c_WRITE_00000
+
+	i2c_write(1); // day
+00F9  3001  	MOVLW 0x01
+00FA  00AA  	MOVWF i2c_WRITE_00000_arg_i2c_data
+00FB  201A  	CALL i2c_WRITE_00000
+
+	i2c_write(1); // month + century
+00FC  3001  	MOVLW 0x01
+00FD  00AA  	MOVWF i2c_WRITE_00000_arg_i2c_data
+00FE  201A  	CALL i2c_WRITE_00000
+
+	i2c_write(0); // year - 0
+00FF  01AA  	CLRF i2c_WRITE_00000_arg_i2c_data
+0100  201A  	CALL i2c_WRITE_00000
+
+	i2c_stop();
+0101  206B  	CALL i2c_STOP_00000
+
+}
+0102  0008  	RETURN
+
+
+void initialise() {
+
+    // Use oscillator callibration value by copying it to OSCCAL
+    asm {
+        call 0x3FF
+010F  23FF  	CALL 0x000003FF
+
+        bsf _status, RP0
+0110  1283  	BCF STATUS, RP0
+0111  1683  	BSF gbl_status,5
+
+        movwf _osccal
+0112  1683  	BSF STATUS, RP0
+0113  0090  	MOVWF gbl_osccal
+
+        bcf _status, RP0
+    }
+0114  1283  	BCF STATUS, RP0
+0115  1283  	BCF gbl_status,5
+
+    // GP0 = IN/OUT: I2C SCL
+    // GP1 = IN/OUT, I2C SDA
+    // GP2 = OUT: Relay trigger
+    // GP3 = IN: push button
+    // GP4 = OUT: LED
+    // GP5 = IN: SQW input
+    trisio = 0b00101011;
+0116  302B  	MOVLW 0x2B
+0117  1683  	BSF STATUS, RP0
+0118  0085  	MOVWF gbl_trisio
+
+    gpio = 0b00001000; // all LEDs/outputs off by default
+0119  3008  	MOVLW 0x08
+011A  1283  	BCF STATUS, RP0
+011B  0085  	MOVWF gbl_gpio
+
+
+    ansel = 0; // configure A/D inputs as digital I/O
+011C  1683  	BSF STATUS, RP0
+011D  019F  	CLRF gbl_ansel
+
+    cmcon = 7; // compartor off
+011E  3007  	MOVLW 0x07
+011F  1283  	BCF STATUS, RP0
+0120  0099  	MOVWF gbl_cmcon
+
+
+    // OPTION register - for TMR0 and Weak pull-ups config
+    // Bit 7 NOT_GPPU = 1 : disable pull ups
+    // Bit 5 T0CS = 0: TMR0 Clock Source Select bit...0 = Internal Clock (CLKO) 1 = Transition on T0CKI pin
+    // Bit 4 T0SE = 0: TMR0 Source Edge Select bit 0 = low/high 1 = high/low
+    // Bit 3 PSA = 0: Prescaler Assignment bit...0 = Prescaler is assigned to the Timer0
+    // Bits 2-0 PS2:PS0 = 111: Prescaler Rate Select bits, 111 = 1:256 prescaler
+    option_reg = 0x1000111;
+0121  3011  	MOVLW 0x11
+0122  1683  	BSF STATUS, RP0
+0123  0081  	MOVWF gbl_option_reg
+
+    //Timer0 Registers Prescaler= 256 - TMR0 Preset = 61 - Freq = 20.03 Hz - Period = 0.049920 seconds
+    tmr0 = TMR0PRESET; // preset for timer0 register
+0124  303D  	MOVLW 0x3D
+0125  1283  	BCF STATUS, RP0
+0126  0081  	MOVWF gbl_tmr0
+
+    
+    // Timer 1 setup - interrupt on DS3231 SQW 1Hz
+    // Timer1 Registers Prescaler= 1 - TMR1 Preset = 65535 - Freq = 1 Hz
+    // Bits 5-4 T1CKPS1:T1CKPS0 = 00: Prescaler Rate Select bits, 00 = 1:1 prescaler
+    // Bit 3 T1OSCEN = 0: Timer1 LP Oscillator Enable Control bit, 0 = off
+    // Bit 2 NOT_T1SYNC = 1: Timer1 External Clock Input Synchronization Control bit, 1 = Do not synchronize external clock input
+    // Bit 1 TMR1CS = 1: Timer1 Clock Source Select bit, 1 = External clock from T1OSO/T1CKI pin (on the rising edge)
+    // Bit 0 TMR1ON = 0: Timer1 On Bit, 0 = off
+    t1con = 0b00000110;
+0127  3006  	MOVLW 0x06
+0128  0090  	MOVWF gbl_t1con
+
+    tmr1h = TMR1HV;      // preset for timer1 MSB register
+0129  30FF  	MOVLW 0xFF
+012A  008F  	MOVWF gbl_tmr1h
+
+    tmr1l = TMR1LV;      // preset for timer1 LSB register
+012B  008E  	MOVWF gbl_tmr1l
+
+    pie1.TMR1IE = 1;     // Timer 1 interrupt
+012C  1683  	BSF STATUS, RP0
+012D  140C  	BSF gbl_pie1,0
+
+    
+    // Setup for GP3 Interrupt [Button press]
+    ioc.IOC3 = 1; // GP3 interrupt on change
+012E  1596  	BSF gbl_ioc,3
+
+    intcon.GPIE = 1; // GP3/RB0 Interrupt enabled (for button)
+012F  1283  	BCF STATUS, RP0
+0130  158B  	BSF gbl_intcon,3
+
+    
+    // No task at initialisation
+    cTask = 0;
+0131  01A6  	CLRF gbl_cTask
+
+    iDebounceCounter = 0;
+0132  01A7  	CLRF gbl_iDebounceCounter
+
+    iSetTime = 0;
+0133  01A5  	CLRF gbl_iSetTime
+
+    iSec = 0;
+0134  01A3  	CLRF gbl_iSec
+
+    iMin = 0;
+0135  01A4  	CLRF gbl_iMin
+
+    
+	i2c_init(1); 
+0136  3001  	MOVLW 0x01
+0137  00A8  	MOVWF i2c_INIT_00000_arg_i2c_divisor
+0138  118A  	BCF PCLATH,3
+0139  120A  	BCF PCLATH,4
+013A  20DA  	CALL i2c_INIT_00000
+
+	ds3231WriteDate();
+013B  20ED  	CALL ds3231Writ_00015
+
+	ds3231Init();
+013C  2103  	CALL ds3231Init_00000
+
+
+    // Enable interrupts
+    intcon.GIE = 1;
+013D  178B  	BSF gbl_intcon,7
+
+    intcon.PEIE = 1;
+013E  170B  	BSF gbl_intcon,6
+
+}
+013F  0008  	RETURN
+
+
+
+void main() {
+
+    initialise();
+014D  210F  	CALL initialise_00000
+
+
+    // Endless loop
+    while(1) {
+014E        label16
+0190  294E  	GOTO	label16
+
+        if (cTask.TASK_INT_IOC) {
+014E  1C26  	BTFSS gbl_cTask,0
+014F  2955  	GOTO	label17
+0155        label17
+
+            // Interrupt-on-change occured - start timer 0
+            // Reset timer 0
+            tmr0 = TMR0PRESET;
+0150  303D  	MOVLW 0x3D
+0151  0081  	MOVWF gbl_tmr0
+
+            // Enable timer 0 interrupt
+            intcon.T0IE = 1;
+0152  168B  	BSF gbl_intcon,5
+
+            cTask.TASK_INT_IOC = 0;
+0153  1026  	BCF gbl_cTask,0
+
+        } else if (cTask.TASK_TIMER0) {
+0154  2978  	GOTO	label21
+0155  1CA6  	BTFSS gbl_cTask,1
+0156  2978  	GOTO	label21
+0178        label21
+
+            // Timer complete
+            // if debounce counter is 1, check state is still on
+            if ((iDebounceCounter == 1) && (!BUTTON)) {
+0157  0327  	DECF gbl_iDebounceCounter, W
+0158  1D03  	BTFSS STATUS,Z
+0159  296E  	GOTO	label19
+015A  1985  	BTFSC gbl_gpio,3
+015B  296E  	GOTO	label19
+016E        label19
+
+                // Button still pressed and debounced, set a timer
+                if (iSetTime == 0) {
+015C  08A5  	MOVF gbl_iSetTime, F
+015D  1D03  	BTFSS STATUS,Z
+015E  2966  	GOTO	label18
+0166        label18
+
+                    iSetTime = TIME1;
+015F  3001  	MOVLW 0x01
+0160  00A5  	MOVWF gbl_iSetTime
+
+                    // Start the DS3231 on the first timer
+                    ds3231Start();
+0161  2147  	CALL ds3231Star_00014
+
+                    // Red LED
+                    RED = 1;
+0162  1605  	BSF gbl_gpio,4
+
+                    // On relay and enable timer 1
+                    RELAY = 1;
+0163  1505  	BSF gbl_gpio,2
+
+                    t1con.TMR1ON = 1; // Enable Timer 1
+0164  1410  	BSF gbl_t1con,0
+
+                } else {
+0165  2977  	GOTO	label20
+
+                    iSetTime = 0;
+0166  01A5  	CLRF gbl_iSetTime
+
+                    // Off LEDs
+                    RED = 0;
+0167  1205  	BCF gbl_gpio,4
+
+                    // Off relay, disable timer 1
+                    RELAY = 0;
+0168  1105  	BCF gbl_gpio,2
+
+                    iSec = 0;
+0169  01A3  	CLRF gbl_iSec
+
+                    iMin = 0;
+016A  01A4  	CLRF gbl_iMin
+
+                    // Disable Timer 1
+                    t1con.TMR1ON = 0;
+016B  1010  	BCF gbl_t1con,0
+
+                    // Stop DS3231
+                    ds3231Stop();
+016C  2140  	CALL ds3231Stop_00000
+
+                }
+            } else if ((iDebounceCounter > 2) && (BUTTON)) {
+016D  2977  	GOTO	label20
+016E  0827  	MOVF gbl_iDebounceCounter, W
+016F  3C02  	SUBLW 0x02
+0170  1803  	BTFSC STATUS,C
+0171  2977  	GOTO	label20
+0172  1D85  	BTFSS gbl_gpio,3
+0173  2977  	GOTO	label20
+0177        label20
+
+                // Button released, interrupt can be enabled again
+                intcon.GPIE = 1; // Enable interrupt
+0174  158B  	BSF gbl_intcon,3
+
+                intcon.T0IE = 0; // Disable timer 0 interrupt
+0175  128B  	BCF gbl_intcon,5
+
+                iDebounceCounter = 0;
+0176  01A7  	CLRF gbl_iDebounceCounter
+
+            }
+            cTask.TASK_TIMER0 = 0;
+0177  10A6  	BCF gbl_cTask,1
+
+        }
+        
+        if (cTask.TASK_TIMER1) {			            
+0178  1D26  	BTFSS gbl_cTask,2
+0179  2989  	GOTO	label23
+0189        label23
+
+            RED ^= 1; // toggle the red LED
+017A  0805  	MOVF gbl_gpio, W
+017B  3A10  	XORLW 0x10
+017C  0085  	MOVWF gbl_gpio
+
+            
+            // Check if iMin reached setting
+            if (iMin >= iSetTime) {
+017D  0825  	MOVF gbl_iSetTime, W
+017E  0224  	SUBWF gbl_iMin, W
+017F  1C03  	BTFSS STATUS,C
+0180  2988  	GOTO	label22
+0188        label22
+
+                // Time reached, switch off relay and reset
+                RELAY = 0;
+0181  1105  	BCF gbl_gpio,2
+
+                // Reset time
+                iSec = 0;
+0182  01A3  	CLRF gbl_iSec
+
+                iMin = 0;
+0183  01A4  	CLRF gbl_iMin
+
+                iSetTime = 0;
+0184  01A5  	CLRF gbl_iSetTime
+
+                // Off LEDs
+                RED = 0;
+0185  1205  	BCF gbl_gpio,4
+
+                // Disable Timer 1
+                t1con.TMR1ON = 0;
+0186  1010  	BCF gbl_t1con,0
+
+                // Stop DS3231
+                ds3231Stop();
+0187  2140  	CALL ds3231Stop_00000
+
+            }
+            cTask.TASK_TIMER1 = 0;
+0188  1126  	BCF gbl_cTask,2
+
+        } 
+        if (!t1con.TMR1ON && !intcon.T0IE) {
+0189  1810  	BTFSC gbl_t1con,0
+018A  294E  	GOTO	label16
+018B  1A8B  	BTFSC gbl_intcon,5
+018C  294E  	GOTO	label16
+
+            // We can only sleep if the timers are off
+            intcon.GPIE = 1; // ensure the button press interrupt is enabled
+018D  158B  	BSF gbl_intcon,3
+
+            sleep();
+018E  0063  	SLEEP
+
+            nop(); // NOP must occur after wake up
+018F  0000  	NOP
+
+        }
+    }
+}
+
+
+////////////////////////////////////////////////////////////////////////////
+// I2C Communications Library for I2C MASTER
+////////////////////////////////////////////////////////////////////////////
+// Author(s): Andrew Smallridge
+// Date 15 November 2004
+//
+// Copyright(C) 2004-2006 Andrew Smallridge
+// Copyright(C) 2004-2010 Pavel Baranov
+// Copyright(C) 2004-2010 David Hobday
+// Existing constants predefined for i2c hardware driver and i2s software
+// emulation for the PIC 18F2xx and 18F4xx processors. For hardware support
+// on other PICs the constants must be mapped to the corresponding register
+// map of the target device
+////////////////////////////////////////////////////////////////////////////
+
+/*
+////////////////////////////////////////////////////////////////////////////
+//	The following three sections should be copied to the user's program:
+//		i2c master hardware / software mode definition
+//		i2c software implementation template arguments and variables
+// 		i2c hardwareware implementation template arguments
+////////////////////////////////////////////////////////////////////////////
+//
+//
+////////////////////////////////////////////////////////////////////////////
+// i2c master hardware / software mode definition
+//
+// For i2c hardware support comment out the #define use_ic2_SW line
+////////////////////////////////////////////////////////////////////////////
+//#define use_i2c_SW
+
+#if defined use_i2c_SW
+////////////////////////////////////////////////////////////////////////////
+// i2c software implementation template arguments and variables
+////////////////////////////////////////////////////////////////////////////
+#define i2c_ARGS	3, PORTC, TRISC, 4, PORTC, TRISC, e_SSPCON1, e_SSPCON2, \
+					e_SSPSTAT, e_SSPBUF, e_SSPIF_BIT, e_SSPIF_PIR,			\
+					e_BCLIF_BIT, e_BCLIF_PIR, 7, e_SSPADD, (i2c_reset_wdt | i2c_SMP)
+
+// RAM used by the software i2c driver to emulate the equivalent i2c hardware registers					
+unsigned short swi2c_SSPCON1@0x40;	// define location for the emulated SSPCON1
+unsigned short swi2c_SSPCON2@0x41;	// define location for the emulated SSPCON2
+unsigned short swi2c_SSPSTAT@0x42;	// define location for the emulated SSPSTAT
+unsigned short swi2c_SSPBUF@0x43;	// define location for the emulated SSPBUF
+unsigned short swi2c_SSPIF_PIR@0x44;// define location for the emulated SSPIF_PIR
+unsigned short swi2c_BCLIF_PIR@0x45;// define location for the emulated BCLIF_PIR
+unsigned short swi2c_SSPADD@0x46;	// define location for the emulated SSPADD
+
+// variables cannot be passed as template arguments. The following constants map to
+// the PIC registers and software emalated i2c RAM locations. These constants are
+// then used by the templated functions. When changing the address of an emulated
+// register the corresponding constant mapping must also be changed.
+#define e_SSPCON1	0x40
+#define e_SSPCON2	0x41
+#define e_SSPSTAT	0x42
+#define e_SSPADD	0x43
+#define e_SSPBUF	0x44
+#define e_SSPIF_PIR	0x45
+#define e_BCLIF_PIR	0x46
+#define e_SSPIF_BIT	3
+#define e_BCLIF_BIT	3					
+
+#else
+////////////////////////////////////////////////////////////////////////////
+// i2c hardwareware implementation template arguments
+////////////////////////////////////////////////////////////////////////////
+#define i2c_ARGS	3, PORTC, TRISC, 4, PORTC, TRISC, e_SSPCON1, e_SSPCON2, \
+					e_SSPSTAT, e_SSPBUF, e_SSPIF_BIT, e_SSPIF_PIR,			\
+					e_BCLIF_BIT, e_BCLIF_PIR, 7, e_SSPADD, (i2c_reset_wdt | i2c_SMP |i2c_HW)
+
+// variables cannot be passed as template arguments. The following constants map to
+// the PIC registers and PIC's i2c register locations. These constants are
+// then used by the templated functions. 
+#define PORTC		0x0f82
+#define TRISC		0x0f94
+#define e_SSPCON1	0xfc6
+#define e_SSPCON2	0xfc5
+#define e_SSPSTAT	0xfc7
+#define e_SSPADD	0xfc8
+#define e_SSPBUF	0xfc9
+#define e_SSPIF_PIR	0xf9e
+#define e_BCLIF_PIR	0xfa1
+#define e_SSPIF_BIT	3
+#define e_BCLIF_BIT	3
+
+#endif
+
+*/
+
+
+////////////////////////////////////////////////////////////////////////////
+// Define the common i2c template structure
+////////////////////////////////////////////////////////////////////////////
+#define _I2C_TEMPL	template <unsigned char T_SCL_BIT, unsigned short T_SCL_PORT,	\
+					unsigned short T_SCL_TRIS, unsigned char T_SDA_BIT, 			\
+					unsigned short T_SDA_PORT, unsigned short T_SDA_TRIS,			\
+					unsigned short T_i2c_SSPCON1, unsigned short T_i2c_SSPCON2, 	\
+					unsigned short T_i2c_SSPSTAT, unsigned short T_i2c_SSPBUF, 		\
+					unsigned char T_i2c_SSPIF_BIT, unsigned short T_i2c_SSPIF_PIR,	\
+					unsigned char T_i2c_BCLIF_BIT, unsigned short T_i2c_BCLIF_PIR,	\
+					unsigned char T_i2c_SMP_BIT, unsigned short T_i2c_SSPADD, 		\
+					unsigned char T_MODE>
+
+////////////////////////////////////////////////////////////////////////////
+// Define the common i2c template parameters
+////////////////////////////////////////////////////////////////////////////
+#define _I2C_TEMPL_ARGS	T_SCL_BIT, T_SCL_PORT, T_SCL_TRIS, T_SDA_BIT, 			\
+						T_SDA_PORT, T_SDA_TRIS, T_i2c_SSPCON1, T_i2c_SSPCON2, 	\
+						T_i2c_SSPSTAT, T_i2c_SSPBUF, T_i2c_SSPIF_BIT, 			\
+						T_i2c_SSPIF_PIR, T_i2c_BCLIF_BIT, T_i2c_BCLIF_PIR,		\
+						T_i2c_SMP_BIT, T_i2c_SSPADD, T_MODE
+
+////////////////////////////////////////////////////////////////////////////
+// Helpers that hide template arguments
+////////////////////////////////////////////////////////////////////////////
+#define i2c_init	i2c_INIT<i2c_ARGS>
+#define i2c_start	i2c_START<i2c_ARGS>
+#define i2c_restart	i2c_RESTART<i2c_ARGS>
+#define i2c_stop	i2c_STOP<i2c_ARGS>
+#define i2c_read	i2c_READ<i2c_ARGS>
+#define i2c_write	i2c_WRITE<i2c_ARGS>
+
+
+////////////////////////////////////////////////////////////////////////////
+// I2C Control Status Bits - Emulates the PIC18F hardware I2C implementation
+////////////////////////////////////////////////////////////////////////////
+// define I2C i2C_SSPCON1 control bits
+#define	i2c_WCOL	7
+#define	i2c_SSPOV	6
+#define	i2c_SSPEN	5
+#define	i2c_CKP		4
+#define	i2c_SSPM3	3
+#define	i2c_SSPM2	2
+#define	i2c_SSPM1	1
+#define	i2c_SSPM0	0
+
+// define I2C SSPCON2 control bits
+#define	i2c_GCEN 	7
+#define	i2c_ACKSTAT	6
+#define	i2c_ACKDT	5
+#define	i2c_ACKEN	4
+#define	i2c_RCEN	3
+#define	i2c_PEN		2
+#define	i2c_RSEN	1
+#define	i2c_SEN		0
+
+// define I2C SSPSTAT status bits
+#define	i2c_DA		5
+#define	i2c_P		4
+#define	i2c_S		3
+#define	i2c_RW		2
+#define	i2c_UA		1
+#define	i2c_BF		0
+
+
+////////////////////////////////////////////////////////////////////////////
+// I2C Control Flag Bits
+////////////////////////////////////////////////////////////////////////////
+// define I2C Mode bits
+#define	i2c_HW			0x01
+#define	i2c_400KHz		0x02	// 100KHz or 400KHz I2C clock (set = 400KHz)
+#define	i2c_reset_wdt	0x04
+#define i2c_SMP			0x80	
+
+
+////////////////////////////////////////////////////////////////////////////
+// I2C software constants
+////////////////////////////////////////////////////////////////////////////
+#define	dly 10	// number of 1us delay increments
+
+
+
+////////////////////////////////////////////////////////////////////////////
+// Generates the I2C Bus Start Condition
+////////////////////////////////////////////////////////////////////////////
+_I2C_TEMPL 
+void i2c_START(void)
+
+{
+	// Initiate the I2C START condition
+	volatile bit l_scl@T_SCL_PORT.T_SCL_BIT, l_sda@T_SDA_PORT.T_SDA_BIT;
+	volatile bit l_scl_tris@T_SCL_TRIS.T_SCL_BIT, l_sda_tris@T_SDA_TRIS.T_SDA_BIT;
+	volatile bit l_sspif@T_i2c_SSPIF_PIR.T_i2c_SSPIF_BIT, l_bclif@T_i2c_BCLIF_PIR.T_i2c_BCLIF_BIT;
+	volatile bit l_rw@T_i2c_SSPSTAT.i2c_RW, l_s@T_i2c_SSPSTAT.i2c_S, l_sen@T_i2c_SSPCON2.i2c_SEN;
+	volatile bit l_rcen@T_i2c_SSPCON2.i2c_RCEN, l_pen@T_i2c_SSPCON2.i2c_PEN;
+	volatile bit l_rsen@T_i2c_SSPCON2.i2c_RSEN, l_acken@T_i2c_SSPCON2.i2c_ACKEN;
+		
+	delay_us(dly);
+009A  300A  	MOVLW 0x0A
+009B  1283  	BCF STATUS, RP0
+009C  00AD  	MOVWF delay_us_00000_arg_del
+009D  2010  	CALL delay_us_00000
+
+	l_bclif = 0; // initialise the collision flag for this command
+009E  11C6  	BCF i2c_START_00000_1_l_bclif,3
+
+	l_sspif = 0;
+009F  11C5  	BCF i2c_START_00000_1_l_sspif,3
+
+		
+	if (T_MODE & i2c_HW)
+	{
+		//	Hardware I2C implementation
+		while (l_acken || l_rcen || l_pen || l_rsen || l_sen || l_rw)
+			if (T_MODE & i2c_reset_wdt)
+				clear_wdt();
+			
+		l_sen = 1; // initiate START condition	
+
+		while (l_acken || l_rcen || l_pen || l_rsen || l_sen || l_rw || !l_sspif)
+			if (T_MODE & i2c_reset_wdt)
+				clear_wdt();
+	}
+	else
+	{
+		//	Software I2C implementation			
+		l_sen = 1; // initiate START condition
+00A0  1441  	BSF i2c_START_00000_1_l_sen,0
+
+		l_scl_tris = 1; // ensure the SCL line is high
+00A1  1683  	BSF STATUS, RP0
+00A2  1405  	BSF i2c_START_00000_1_l_scl_tris,0
+
+		l_sda_tris = 1; // ensure the SDA line is high	
+00A3  1485  	BSF i2c_START_00000_1_l_sda_tris,1
+
+		l_scl = 0; // prepare to set SCL line low
+00A4  1283  	BCF STATUS, RP0
+00A5  1005  	BCF i2c_START_00000_1_l_scl,0
+
+		l_sda = 0; // prepare to set SDA line low
+00A6  1085  	BCF i2c_START_00000_1_l_sda,1
+
+		
+		if (l_scl && l_sda)
+00A7  1C05  	BTFSS i2c_START_00000_1_l_scl,0
+00A8  28C6  	GOTO	label15
+00A9  1C85  	BTFSS i2c_START_00000_1_l_sda,1
+00AA  28C6  	GOTO	label15
+00C6        label15
+
+		{
+			// good sign - no collision detected
+			delay_us(dly);
+00AB  300A  	MOVLW 0x0A
+00AC  00AD  	MOVWF delay_us_00000_arg_del
+00AD  2010  	CALL delay_us_00000
+
+			
+			if (!l_scl) // ensure the clock is still high
+00AE  1805  	BTFSC i2c_START_00000_1_l_scl,0
+00AF  28B4  	GOTO	label14
+00B4        label14
+
+			{
+				l_bclif = 1;
+00B0  15C6  	BSF i2c_START_00000_1_l_bclif,3
+
+				l_s = 1;
+00B1  15C2  	BSF i2c_START_00000_1_l_s,3
+
+				l_sen = 0;
+00B2  1041  	BCF i2c_START_00000_1_l_sen,0
+
+				return;
+			}
+					
+			l_sda = 0; // prepare to set SDA line low
+00B4  1085  	BCF i2c_START_00000_1_l_sda,1
+
+			l_sda_tris = 0; // SDA to output (driven low)
+00B5  1683  	BSF STATUS, RP0
+00B6  1085  	BCF i2c_START_00000_1_l_sda_tris,1
+
+
+			delay_us(dly);					
+00B7  300A  	MOVLW 0x0A
+00B8  1283  	BCF STATUS, RP0
+00B9  00AD  	MOVWF delay_us_00000_arg_del
+00BA  2010  	CALL delay_us_00000
+
+			l_scl = 0; // prepare to set SCL line low
+00BB  1005  	BCF i2c_START_00000_1_l_scl,0
+
+			l_scl_tris = 0; // SCL to output (driven low)
+00BC  1683  	BSF STATUS, RP0
+00BD  1005  	BCF i2c_START_00000_1_l_scl_tris,0
+
+
+			delay_us(dly);					
+00BE  300A  	MOVLW 0x0A
+00BF  1283  	BCF STATUS, RP0
+00C0  00AD  	MOVWF delay_us_00000_arg_del
+00C1  2010  	CALL delay_us_00000
+
+			l_s = 1; // set 'S' bit flag (start bit detected)
+00C2  15C2  	BSF i2c_START_00000_1_l_s,3
+
+			l_sen = 0; // clear flag
+00C3  1041  	BCF i2c_START_00000_1_l_sen,0
+
+			l_sspif = 1; // flag end of start condition interrupt	
+00C4  15C5  	BSF i2c_START_00000_1_l_sspif,3
+
+		}
+		else
+		{
+			// here is SDA or SCL are low at the start - indicates a bus collision
+			l_bclif = 1;
+00C6  15C6  	BSF i2c_START_00000_1_l_bclif,3
+
+			l_s = 1; // set 'S' bit flag (start bit detected)
+00C7  15C2  	BSF i2c_START_00000_1_l_s,3
+
+			l_sen = 0;
+00C8  1041  	BCF i2c_START_00000_1_l_sen,0
+
+			l_rsen = 0;
+00C9  10C1  	BCF i2c_START_00000_1_l_rsen,1
+
+			l_pen = 0;
+00CA  1141  	BCF i2c_START_00000_1_l_pen,2
+
+			l_rcen = 0;								
+00CB  11C1  	BCF i2c_START_00000_1_l_rcen,3
+
+			l_acken = 0;			
+00CC  1241  	BCF i2c_START_00000_1_l_acken,4
+
+		}
+	}
+}
+00B3  0008  	RETURN
+00C5  0008  	RETURN
+00CD  0008  	RETURN
+
+
+
+
+////////////////////////////////////////////////////////////////////////////
+// Generates the I2C Bus Restart Condition
+////////////////////////////////////////////////////////////////////////////
+_I2C_TEMPL
+void i2c_RESTART(void)
+{
+	// Initiate the I2C RESTART condition
+	volatile bit l_scl@T_SCL_PORT.T_SCL_BIT, l_sda@T_SDA_PORT.T_SDA_BIT;
+	volatile bit l_scl_tris@T_SCL_TRIS.T_SCL_BIT, l_sda_tris@T_SDA_TRIS.T_SDA_BIT;
+	volatile bit l_sspif@T_i2c_SSPIF_PIR.T_i2c_SSPIF_BIT, l_bclif@T_i2c_BCLIF_PIR.T_i2c_BCLIF_BIT;
+	volatile bit l_rw@T_i2c_SSPSTAT.i2c_RW, l_s@T_i2c_SSPSTAT.i2c_S; 
+	volatile bit l_rcen@T_i2c_SSPCON2.i2c_RCEN, l_pen@T_i2c_SSPCON2.i2c_PEN, l_sen@T_i2c_SSPCON2.i2c_SEN;
+	volatile bit l_rsen@T_i2c_SSPCON2.i2c_RSEN, l_acken@T_i2c_SSPCON2.i2c_ACKEN;
+			
+	delay_us(dly);
+	l_bclif = 0; // initialise the collision flag for this command
+	l_sspif = 0;
+
+	if (T_MODE & i2c_HW)
+	{
+		//	Hardware I2C implementation	
+		while (l_acken || l_rcen || l_pen || l_rsen || l_sen || l_rw)	
+			if (T_MODE & i2c_reset_wdt)
+				clear_wdt();
+					
+		l_rsen = 1; // initiate RESTART condition
+	
+		while (l_acken || l_rcen || l_pen || l_rsen || l_sen || l_rw || !l_sspif)			
+			if (T_MODE & i2c_reset_wdt)
+				clear_wdt();
+	}
+	else
+	{
+		//	Software I2C implementation	
+		l_rsen = 1;
+		l_scl = 0;
+		l_sda = 0;
+		
+		if (!l_scl)
+		{
+			// good sign - no other I2C activity in progress
+			l_sda_tris = 1; // float SDA line high	(should already be in this condition)	
+			delay_us(dly);
+		
+			// about to float the clock line
+			// ensure the data line is still high
+			if (!l_sda)
+			{
+				// problem - SDA is low, a bus collision has occurred				
+				l_bclif = 1; // set the bus collision flag	
+				l_s = 0; // clear 'S' bit flag
+				l_rsen = 0;
+				l_scl_tris = 1; // float SCL line (high)	
+				return;
+			}
+												
+			l_scl_tris = 1; // float SCL line (high)
+
+			// wait until any clock stretching has finished
+			while (!l_scl)
+				if (T_MODE & i2c_reset_wdt)
+					clear_wdt();	
+			delay_us(dly);
+			
+			// here we are about to drive SDA low
+			// first ensure SCL is still high
+			if (!l_scl)
+			{
+				// problem - SCL is low, a bus collision has occurred
+				l_bclif = 1; // set the bus collision flag
+				l_s = 0; // clear 'S' bit flag
+				l_rsen = 0;
+				l_sda_tris = 1; // float SDA line (high)
+				return;
+			}
+				
+			l_sda_tris = 0; // drive SDA low
+			l_s = 1; // set 'S' bit flag (start bit detected)
+
+			delay_us(dly);
+			l_scl_tris = 0; // drive SCL low
+			l_rsen = 0;
+			l_pen = 0;
+			l_sen = 0;			
+			l_rcen = 0;								
+			l_acken = 0;			
+			l_sspif = 1; // flag end of start condition interrupt
+		}
+		else
+		{
+			// SCL is high at the start
+			// some other I2C activity in progress		
+			l_rsen = 0; // clear flag
+			// exit without further action
+		}
+	}
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////
+// Generates the I2C Bus Stop Condition
+////////////////////////////////////////////////////////////////////////////
+_I2C_TEMPL
+void i2c_STOP(void)
+
+{ 
+	volatile bit l_scl@T_SCL_PORT.T_SCL_BIT, l_sda@T_SDA_PORT.T_SDA_BIT;
+	volatile bit l_scl_tris@T_SCL_TRIS.T_SCL_BIT, l_sda_tris@T_SDA_TRIS.T_SDA_BIT;
+	volatile bit l_sspif@T_i2c_SSPIF_PIR.T_i2c_SSPIF_BIT, l_bclif@T_i2c_BCLIF_PIR.T_i2c_BCLIF_BIT;
+	volatile bit l_rw@T_i2c_SSPSTAT.i2c_RW, l_s@T_i2c_SSPSTAT.i2c_S, l_p@T_i2c_SSPSTAT.i2c_P; 
+	volatile bit l_rcen@T_i2c_SSPCON2.i2c_RCEN, l_pen@T_i2c_SSPCON2.i2c_PEN, l_sen@T_i2c_SSPCON2.i2c_SEN;
+	volatile bit l_rsen@T_i2c_SSPCON2.i2c_RSEN, l_acken@T_i2c_SSPCON2.i2c_ACKEN;
+
+	l_bclif = 0; // initialise the collision flag for this command
+006B  1283  	BCF STATUS, RP0
+006C  11C6  	BCF i2c_STOP_00000_1_l_bclif,3
+
+	l_sspif = 0;
+006D  11C5  	BCF i2c_STOP_00000_1_l_sspif,3
+
+
+	if (T_MODE & i2c_HW)
+	{
+		//	Hardware I2C implementation	
+		while (l_acken || l_rcen || l_pen || l_rsen || l_sen || l_rw)	
+			if (T_MODE & i2c_reset_wdt)
+				clear_wdt();
+					
+		l_pen = 1; // initiate STOP condition on the I2C bus	
+	
+		while (l_acken || l_rcen || l_pen || l_rsen || l_sen || l_rw || !l_sspif)			
+			if (T_MODE & i2c_reset_wdt)
+				clear_wdt();		
+		
+	}
+	else
+	{
+		//	Software I2C implementation
+		l_pen = 1; // initiate STOP condition on the I2C bus
+006E  1541  	BSF i2c_STOP_00000_1_l_pen,2
+
+		delay_us(dly);
+006F  300A  	MOVLW 0x0A
+0070  00AD  	MOVWF delay_us_00000_arg_del
+0071  2010  	CALL delay_us_00000
+
+		
+		l_scl = 0; // prepare to set SCL line low
+0072  1005  	BCF i2c_STOP_00000_1_l_scl,0
+
+		l_sda = 0; // prepare to set SDA line low
+0073  1085  	BCF i2c_STOP_00000_1_l_sda,1
+
+		l_scl_tris = 0; // drive SCL line low (should already be low)
+0074  1683  	BSF STATUS, RP0
+0075  1005  	BCF i2c_STOP_00000_1_l_scl_tris,0
+
+		l_sda_tris = 0; // drive SDA line low
+0076  1085  	BCF i2c_STOP_00000_1_l_sda_tris,1
+
+
+		delay_us(dly);		
+0077  300A  	MOVLW 0x0A
+0078  1283  	BCF STATUS, RP0
+0079  00AD  	MOVWF delay_us_00000_arg_del
+007A  2010  	CALL delay_us_00000
+
+		l_scl_tris = 1; // float SCL line (high)
+007B  1683  	BSF STATUS, RP0
+007C  1405  	BSF i2c_STOP_00000_1_l_scl_tris,0
+
+		
+		// wait until any clock stretching has finished
+		while (!l_scl)
+007D        label10
+007D  1283  	BCF STATUS, RP0
+007E  1805  	BTFSC i2c_STOP_00000_1_l_scl,0
+007F  2882  	GOTO	label11
+0081  287D  	GOTO	label10
+0082        label11
+
+			if (T_MODE & i2c_reset_wdt)
+				clear_wdt();
+0080  0064  	CLRWDT
+
+						
+		delay_us(dly);
+0082  300A  	MOVLW 0x0A
+0083  00AD  	MOVWF delay_us_00000_arg_del
+0084  2010  	CALL delay_us_00000
+
+		l_sda_tris = 1; // float SDA line
+0085  1683  	BSF STATUS, RP0
+0086  1485  	BSF i2c_STOP_00000_1_l_sda_tris,1
+
+		delay_us(dly);		
+0087  300A  	MOVLW 0x0A
+0088  1283  	BCF STATUS, RP0
+0089  00AD  	MOVWF delay_us_00000_arg_del
+008A  2010  	CALL delay_us_00000
+
+		
+		// here the SDA line should be high - if not a collision has occurred				
+		if (!l_sda || !l_scl)
+008B  1C85  	BTFSS i2c_STOP_00000_1_l_sda,1
+008C  288F  	GOTO	label12
+008D  1805  	BTFSC i2c_STOP_00000_1_l_scl,0
+008E  2893  	GOTO	label13
+008F        label12
+0093        label13
+
+		{
+			// problem - SDA or SCL is low, a bus collision has occurred
+			l_bclif = 1; // set the bus collision flag	
+008F  15C6  	BSF i2c_STOP_00000_1_l_bclif,3
+
+			l_s = 0; // clear 'S' bit flag
+0090  11C2  	BCF i2c_STOP_00000_1_l_s,3
+
+			l_pen = 0; // clear flag
+0091  1141  	BCF i2c_STOP_00000_1_l_pen,2
+
+		}
+		else
+		{		
+			l_p = 1;
+0093  1642  	BSF i2c_STOP_00000_1_l_p,4
+
+			l_pen = 0;
+0094  1141  	BCF i2c_STOP_00000_1_l_pen,2
+
+			l_sen = 0;
+0095  1041  	BCF i2c_STOP_00000_1_l_sen,0
+
+			l_rsen = 0;			
+0096  10C1  	BCF i2c_STOP_00000_1_l_rsen,1
+
+			l_rcen = 0;								
+0097  11C1  	BCF i2c_STOP_00000_1_l_rcen,3
+
+			l_acken = 0;
+0098  1241  	BCF i2c_STOP_00000_1_l_acken,4
+
+		}
+	}
+}
+0092  0008  	RETURN
+0099  0008  	RETURN
+
+
+
+
+////////////////////////////////////////////////////////////////////////////
+// Generates the I2C Bus Write Condition
+////////////////////////////////////////////////////////////////////////////
+_I2C_TEMPL
+unsigned char i2c_WRITE(unsigned char i2c_data)
+
+{
+	volatile unsigned char i2c_SSPBUF@T_i2c_SSPBUF;	
+	volatile bit l_scl@T_SCL_PORT.T_SCL_BIT, l_sda@T_SDA_PORT.T_SDA_BIT;
+	volatile bit l_scl_tris@T_SCL_TRIS.T_SCL_BIT, l_sda_tris@T_SDA_TRIS.T_SDA_BIT;
+	volatile bit l_bf@T_i2c_SSPSTAT.i2c_BF, l_ackdt@T_i2c_SSPCON2.i2c_ACKDT;
+	volatile bit l_sspif@T_i2c_SSPIF_PIR.T_i2c_SSPIF_BIT, l_bclif@T_i2c_BCLIF_PIR.T_i2c_BCLIF_BIT;
+	volatile bit l_rw@T_i2c_SSPSTAT.i2c_RW,l_wcol@T_i2c_SSPCON1.i2c_WCOL;
+	volatile bit l_rcen@T_i2c_SSPCON2.i2c_RCEN, l_pen@T_i2c_SSPCON2.i2c_PEN, l_sen@T_i2c_SSPCON2.i2c_SEN;
+	volatile bit l_rsen@T_i2c_SSPCON2.i2c_RSEN, l_acken@T_i2c_SSPCON2.i2c_ACKEN;
+	
+	char BitMask;
+	bit local_ack;
+
+	l_bclif = 0; // initialise the collision flag for this command
+001A  11C6  	BCF i2c_WRITE_00000_1_l_bclif,3
+
+	l_sspif = 0; // clear the operation completed
+001B  11C5  	BCF i2c_WRITE_00000_1_l_sspif,3
+
+
+	if (T_MODE & i2c_HW)
+	{
+		//	Hardware I2C implementation
+		while (l_acken || l_rcen || l_pen || l_rsen || l_sen || l_rw)
+			if (T_MODE & i2c_reset_wdt)
+				clear_wdt();
+				
+		l_wcol = 0; // clear write collision flag	
+		i2c_SSPBUF = i2c_data;
+
+		// test if a write collision occurred
+		if (l_wcol)
+			return (1); // error exit	
+
+		// wait until MSSP Tx register is empty
+		while (l_acken || l_rcen || l_pen || l_rsen || l_sen || l_rw || !l_sspif)	
+			if (T_MODE & i2c_reset_wdt)
+				clear_wdt();
+								
+		return (0); // successful exit
+	}
+
+	// here for i2c software driver
+	l_wcol = 0; // clear write collision flag	
+001C  13C0  	BCF i2c_WRITE_00000_1_l_wcol,7
+
+	i2c_SSPBUF = i2c_data;
+001D  082A  	MOVF i2c_WRITE_00000_arg_i2c_data, W
+001E  00C4  	MOVWF i2c_WRITE_00000_1_i2c_SSPBUF
+
+	
+	l_scl = 0; // prepare to set SCL line low
+001F  1005  	BCF i2c_WRITE_00000_1_l_scl,0
+
+	l_sda = 0; // prepare to set SDA line low
+0020  1085  	BCF i2c_WRITE_00000_1_l_sda,1
+
+	l_rw = 0; // signal we are doing a write
+0021  1142  	BCF i2c_WRITE_00000_1_l_rw,2
+
+
+	for (BitMask = 0x80; BitMask; BitMask>>=1)
+0022  3080  	MOVLW 0x80
+0023  00AB  	MOVWF i2c_WRITE_00000_1_BitMask
+0024        label2
+0024  08AB  	MOVF i2c_WRITE_00000_1_BitMask, F
+0025  1903  	BTFSC STATUS,Z
+0026  2847  	GOTO	label7
+0044  1003  	BCF STATUS,C
+0045  0CAB  	RRF i2c_WRITE_00000_1_BitMask, F
+0046  2824  	GOTO	label2
+0047        label7
+
+	{
+		if (i2c_data & BitMask)
+0027  082B  	MOVF i2c_WRITE_00000_1_BitMask, W
+0028  052A  	ANDWF i2c_WRITE_00000_arg_i2c_data, W
+0029  1903  	BTFSC STATUS,Z
+002A  282E  	GOTO	label3
+002E        label3
+
+			l_sda_tris = 1; // float SDA high	
+002B  1683  	BSF STATUS, RP0
+002C  1485  	BSF i2c_WRITE_00000_1_l_sda_tris,1
+
+		else
+002D  2830  	GOTO	label4
+0030        label4
+
+			l_sda_tris = 0; // drive SDA low
+002E  1683  	BSF STATUS, RP0
+002F  1085  	BCF i2c_WRITE_00000_1_l_sda_tris,1
+
+		delay_us(dly);
+0030  300A  	MOVLW 0x0A
+0031  1283  	BCF STATUS, RP0
+0032  00AD  	MOVWF delay_us_00000_arg_del
+0033  2010  	CALL delay_us_00000
+
+
+		l_scl_tris = 1; // float SCL high
+0034  1683  	BSF STATUS, RP0
+0035  1405  	BSF i2c_WRITE_00000_1_l_scl_tris,0
+
+
+		// wait until any clock stretching has finished
+		while (!l_scl)
+0036        label5
+0036  1283  	BCF STATUS, RP0
+0037  1805  	BTFSC i2c_WRITE_00000_1_l_scl,0
+0038  283B  	GOTO	label6
+003A  2836  	GOTO	label5
+003B        label6
+
+			if (T_MODE & i2c_reset_wdt)
+				clear_wdt();		
+0039  0064  	CLRWDT
+
+		delay_us(dly);
+003B  300A  	MOVLW 0x0A
+003C  00AD  	MOVWF delay_us_00000_arg_del
+003D  2010  	CALL delay_us_00000
+
+	
+		l_scl_tris = 0; // drive SCL low	
+003E  1683  	BSF STATUS, RP0
+003F  1005  	BCF i2c_WRITE_00000_1_l_scl_tris,0
+
+		delay_us(dly);
+0040  300A  	MOVLW 0x0A
+0041  1283  	BCF STATUS, RP0
+0042  00AD  	MOVWF delay_us_00000_arg_del
+0043  2010  	CALL delay_us_00000
+
+	}
+	// serialized out the data
+	// now get the status		
+	// set SSPIF
+	l_sspif = 1;
+0047  15C5  	BSF i2c_WRITE_00000_1_l_sspif,3
+
+	l_acken = 1;
+0048  1641  	BSF i2c_WRITE_00000_1_l_acken,4
+
+	l_ackdt = 0;
+0049  12C1  	BCF i2c_WRITE_00000_1_l_ackdt,5
+
+	l_sda_tris = 1; // float SDA high
+004A  1683  	BSF STATUS, RP0
+004B  1485  	BSF i2c_WRITE_00000_1_l_sda_tris,1
+
+	
+	delay_us(dly);
+004C  300A  	MOVLW 0x0A
+004D  1283  	BCF STATUS, RP0
+004E  00AD  	MOVWF delay_us_00000_arg_del
+004F  2010  	CALL delay_us_00000
+
+	
+	l_scl_tris = 1; // float SCL high
+0050  1683  	BSF STATUS, RP0
+0051  1405  	BSF i2c_WRITE_00000_1_l_scl_tris,0
+
+	
+	// wait until any clock stretching has finished
+	while (!l_scl)
+0052        label8
+0052  1283  	BCF STATUS, RP0
+0053  1805  	BTFSC i2c_WRITE_00000_1_l_scl,0
+0054  2857  	GOTO	label9
+0056  2852  	GOTO	label8
+0057        label9
+
+		if (T_MODE & i2c_reset_wdt)
+			clear_wdt();	
+0055  0064  	CLRWDT
+
+	delay_us(dly);
+0057  300A  	MOVLW 0x0A
+0058  00AD  	MOVWF delay_us_00000_arg_del
+0059  2010  	CALL delay_us_00000
+
+
+	// get the status bit
+	local_ack = l_sda;
+005A  102C  	BCF i2c_WRITE_00000_1_local_ack,0
+005B  1885  	BTFSC i2c_WRITE_00000_1_l_sda,1
+005C  142C  	BSF i2c_WRITE_00000_1_local_ack,0
+
+	delay_us(dly);
+005D  300A  	MOVLW 0x0A
+005E  00AD  	MOVWF delay_us_00000_arg_del
+005F  2010  	CALL delay_us_00000
+
+
+	l_scl_tris = 0; // drive SCL low	
+0060  1683  	BSF STATUS, RP0
+0061  1005  	BCF i2c_WRITE_00000_1_l_scl_tris,0
+
+	l_acken = 0;
+0062  1283  	BCF STATUS, RP0
+0063  1241  	BCF i2c_WRITE_00000_1_l_acken,4
+
+	delay_us(dly);
+0064  300A  	MOVLW 0x0A
+0065  00AD  	MOVWF delay_us_00000_arg_del
+0066  2010  	CALL delay_us_00000
+
+	return(local_ack);
+0067  01AD  	CLRF CompTempVarRet548
+0068  182C  	BTFSC i2c_WRITE_00000_1_local_ack,0
+0069  0AAD  	INCF CompTempVarRet548, F
+
+}
+006A  0008  	RETURN
+
+
+
+
+////////////////////////////////////////////////////////////////////////////
+// Generates the I2C Bus Read Condition
+////////////////////////////////////////////////////////////////////////////
+_I2C_TEMPL
+unsigned char i2c_READ(char ack_status)
+{
+	volatile unsigned char i2c_SSPBUF@T_i2c_SSPBUF;
+	volatile bit l_scl@T_SCL_PORT.T_SCL_BIT, l_sda@T_SDA_PORT.T_SDA_BIT;
+	volatile bit l_scl_tris@T_SCL_TRIS.T_SCL_BIT, l_sda_tris@T_SDA_TRIS.T_SDA_BIT;
+	volatile bit l_bf@T_i2c_SSPSTAT.i2c_BF, l_ackdt@T_i2c_SSPCON2.i2c_ACKDT;
+	volatile bit l_sspif@T_i2c_SSPIF_PIR.T_i2c_SSPIF_BIT, l_bclif@T_i2c_BCLIF_PIR.T_i2c_BCLIF_BIT;
+	volatile bit l_rw@T_i2c_SSPSTAT.i2c_RW,l_wcol@T_i2c_SSPCON1.i2c_WCOL;
+	volatile bit l_rcen@T_i2c_SSPCON2.i2c_RCEN, l_pen@T_i2c_SSPCON2.i2c_PEN, l_sen@T_i2c_SSPCON2.i2c_SEN;
+	volatile bit l_rsen@T_i2c_SSPCON2.i2c_RSEN, l_acken@T_i2c_SSPCON2.i2c_ACKEN;
+		
+	char BitMask;
+	char i2c_data;
+	bit local_ack;
+
+	l_bclif = 0; // initialise the collision flag for this command
+	l_sspif = 0; // clear the operation completed
+	l_wcol = 0; // clear write collision flag	
+
+	if (T_MODE & i2c_HW)
+	{
+		//	Hardware I2C implementation
+		while (l_acken || l_rcen || l_pen || l_rsen || l_sen || l_rw)
+			if (T_MODE & i2c_reset_wdt)
+				clear_wdt();
+
+		// enable master for 1 byte reception	
+		l_rcen = 1;
+
+		// wait until byte received
+		while(!l_sspif || !l_bf)
+			if (T_MODE & i2c_reset_wdt)
+				clear_wdt();
+
+		// read the byte from the Rx register
+		i2c_data = i2c_SSPBUF;			
+			
+		// wait until the bus is idle		
+		while (l_acken || l_rcen || l_pen || l_rsen || l_sen || l_rw)
+			if (T_MODE & i2c_reset_wdt)
+				clear_wdt();
+
+		if (ack_status)
+			l_ackdt = 1; // preset ack bit
+		else
+			l_ackdt = 0; // preset ack bit
+
+		l_sspif = 0;
+		l_acken = 1; // acknowledge sequence enable
+
+		while (l_acken || l_rcen || l_pen || l_rsen || l_sen || l_rw || !l_sspif)			
+			if (T_MODE & i2c_reset_wdt)
+				clear_wdt();								
+	}
+	else
+	{
+		// here for i2c software driver
+		l_rcen = 1;
+		l_ackdt = ack_status;
+		l_rw = 1;
+		l_scl = 0; // prepare to set SCL line low
+		l_sda = 0; // prepare to set SDA line low	
+
+		// prepare to serialize in the byte
+		l_sda_tris = 1; // float SDA
+		delay_us(dly);
+		i2c_data = 0;
+		for (BitMask = 0x80; BitMask; BitMask>>=1)
+		{
+			l_scl_tris = 1; // float SCL high
+			// wait until any clock stretching has finished
+			while (!l_scl)
+				if (T_MODE & i2c_reset_wdt)
+					clear_wdt();		
+			delay_us(dly);
+
+			// read the current bit
+			l_sda_tris = 1; // float SDA
+			if (l_sda)
+				i2c_data |= BitMask;
+			l_scl_tris = 0; // drive SCL low
+			delay_us(dly);
+		}
+		// flag receive complete			
+		l_sspif = 1;
+		l_rcen = 0;
+		
+		// set the ACK state
+		if (ack_status)	
+			l_sda_tris = 1; // float SDA high
+		else
+			l_sda_tris = 0; // drive SDA low
+		delay_us(dly);
+
+		l_scl_tris = 1; // float SCL high
+
+		// wait until any clock stretching has finished
+		while (!l_scl)
+			if (T_MODE & i2c_reset_wdt)
+				clear_wdt();		
+	
+		l_sspif = 0; // clear SSPIF
+		delay_us(dly);
+	
+		l_scl_tris = 0; // drive SCL low		
+		l_sspif = 1;
+		delay_us(dly);
+	}
+	return(i2c_data);
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////
+// Generates the I2C Bus Initialization
+////////////////////////////////////////////////////////////////////////////
+_I2C_TEMPL
+void i2c_INIT(unsigned char i2c_divisor)
+
+{
+	volatile unsigned char i2c_SSPADD@T_i2c_SSPADD, i2c_SSPSTAT@T_i2c_SSPSTAT;
+	volatile unsigned char i2c_SSPCON1@T_i2c_SSPCON1,i2c_SSPCON2@T_i2c_SSPCON2;
+
+	volatile bit l_scl@T_SCL_PORT.T_SCL_BIT, l_sda@T_SDA_PORT.T_SDA_BIT;
+	volatile bit l_scl_tris@T_SCL_TRIS.T_SCL_BIT, l_sda_tris@T_SDA_TRIS.T_SDA_BIT;
+	volatile bit l_sspif@T_i2c_SSPIF_PIR.T_i2c_SSPIF_BIT, l_bclif@T_i2c_BCLIF_PIR.T_i2c_BCLIF_BIT;
+	volatile bit l_sspen@T_i2c_SSPCON1.i2c_SSPEN, l_smp@T_i2c_SSPSTAT.T_i2c_SMP_BIT;
+
+	l_sda_tris = 1;
+00DA  1683  	BSF STATUS, RP0
+00DB  1485  	BSF i2c_INIT_00000_1_l_sda_tris,1
+
+	l_scl_tris = 1;
+00DC  1405  	BSF i2c_INIT_00000_1_l_scl_tris,0
+
+	
+	i2c_SSPCON1 = 0x00; // initialise the I2C control register (mirrors HW SSPCON1)	
+00DD  1283  	BCF STATUS, RP0
+00DE  01C0  	CLRF i2c_INIT_00000_1_i2c_SSPCON1
+
+	i2c_SSPADD = i2c_divisor; // get the I2C baud rate divisor
+00DF  0828  	MOVF i2c_INIT_00000_arg_i2c_divisor, W
+00E0  00C3  	MOVWF i2c_INIT_00000_1_i2c_SSPADD
+
+	i2c_SSPCON1 = 0x08; // initialise the I2C control register (mirrors HW SSPCON1)	
+00E1  3008  	MOVLW 0x08
+00E2  00C0  	MOVWF i2c_INIT_00000_1_i2c_SSPCON1
+
+	i2c_SSPCON2 = 0x00; // initialise the I2C control register (mirrors HW SSPCON2)	
+00E3  01C1  	CLRF i2c_INIT_00000_1_i2c_SSPCON2
+
+	
+	i2c_SSPSTAT = 0x00; // initialise the I2C status register (mirrors HW SSPSTAT)
+00E4  01C2  	CLRF i2c_INIT_00000_1_i2c_SSPSTAT
+
+	
+	if (T_MODE & i2c_SMP)
+		l_smp = 1;
+00E5  17C2  	BSF i2c_INIT_00000_1_l_smp,7
+
+
+	l_sspif = 0; // initialise the I2C SSP interrupt status
+00E6  11C5  	BCF i2c_INIT_00000_1_l_sspif,3
+
+	l_bclif = 0; // initialise the I2C BCL interrupt status
+00E7  11C6  	BCF i2c_INIT_00000_1_l_bclif,3
+
+	l_sda = 0;
+00E8  1085  	BCF i2c_INIT_00000_1_l_sda,1
+
+	l_scl = 0;
+00E9  1005  	BCF i2c_INIT_00000_1_l_scl,0
+
+	l_sspen = 1; // enable I2C
+00EA  16C0  	BSF i2c_INIT_00000_1_l_sspen,5
+
+	
+	i2c_STOP<_I2C_TEMPL_ARGS>();
+00EB  206B  	CALL i2c_STOP_00000
+
+}
+00EC  0008  	RETURN
+
+
+
+
+
+
+
+////////////////////////////////////////
+// Code with no source :-)
+////////////////////////////////////////
+0000  2991  	GOTO	_startup
+
+0004  00DF  	MOVWF Int1Context
+0005  0E03  	SWAPF STATUS, W
+0006  1283  	BCF STATUS, RP0
+0007  00A0  	MOVWF Int1BContext
+0008  0E0A  	SWAPF PCLATH, W
+0009  00A1  	MOVWF Int1BContext+D'1'
+000A  0E04  	SWAPF FSR, W
+000B  00A2  	MOVWF Int1BContext+D'2'
+000C  118A  	BCF PCLATH,3
+000D  120A  	BCF PCLATH,4
+000E  2994  	GOTO	interrupt
+0010        delay_us_00000
+0010        ; { delay_us ; function begin
+0010  3003  	MOVLW 0x03
+0011  07AD  	ADDWF delay_us_00000_arg_del, F
+0012  0CAD  	RRF delay_us_00000_arg_del, F
+0013  0CAD  	RRF delay_us_00000_arg_del, F
+0014  307F  	MOVLW 0x7F
+0015  05AD  	ANDWF delay_us_00000_arg_del, F
+0016        label1
+0016  0000  	NOP
+0017  0BAD  	DECFSZ delay_us_00000_arg_del, F
+0018  2816  	GOTO	label1
+0019  0008  	RETURN
+001A        ; } delay_us function end
+
+
+
+
+
+
+
+
+
+0191        _startup
+0191  118A  	BCF PCLATH,3
+0192  120A  	BCF PCLATH,4
+0193  294D  	GOTO	main
+
+2007  3FC4  	DW 0x3FC4

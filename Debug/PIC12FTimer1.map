@@ -1,0 +1,76 @@
+;/////////////////////////////////////////////////////////////////////////////////
+;// Code Generator: BoostC Compiler - http://www.sourceboost.com
+;// Version       : 8.01
+;// License Type  : Pro License
+;// Limitations   : PIC12,PIC16 max code size:Unlimited, max RAM banks:Unlimited
+;/////////////////////////////////////////////////////////////////////////////////
+
+
+Map File
+
+Program Memory usage
+====================
+
+Address  Length   Unique Name      Name
+-------  ------   -----------      ----
+00000000:00000004 _resetvector     _resetvector  
+00000004:0000000C _interruptVector _interruptVector  
+00000010:00000020 initialise_00000 initialise(void)  
+00000030:0000007A main             main(void)  
+000000AA:00000006 _startup_00000   _startup(void)  
+000000B0:00000041 interrupt        interrupt(void)  
+000000F1:0000030F *Unused Block 
+
+Register usage
+==============
+
+Address  Bit Lengh Bit Mask   Unique Name                      Name
+-------  --------- --------   -----------                      ----
+00000000:00000008             gbl_indf                         indf
+00000001:00000008             gbl_tmr0                         tmr0
+00000002:00000008             gbl_pcl                          pcl
+00000003:00000008             gbl_status                       status
+00000004:00000008             gbl_fsr                          fsr
+00000005:00000008             gbl_gpio                         gpio
+0000000A:00000008             gbl_pclath                       pclath
+0000000B:00000008             gbl_intcon                       intcon
+0000000C:00000008             gbl_pir1                         pir1
+0000000E:00000008             gbl_tmr1l                        tmr1l
+0000000F:00000008             gbl_tmr1h                        tmr1h
+00000010:00000008             gbl_t1con                        t1con
+00000019:00000008             gbl_cmcon                        cmcon
+0000001E:00000008             gbl_adresh                       adresh
+0000001F:00000008             gbl_adcon0                       adcon0
+00000020:00000018             Int1BContext                     Int1BContext
+00000023:00000010             gbl_bres                         bres
+00000025:00000008             gbl_iSec                         iSec
+00000026:00000008             gbl_iMin                         iMin
+00000027:00000008             gbl_iSetTime                     iSetTime
+00000028:00000008             gbl_cTask                        cTask
+00000029:00000008             gbl_iDebounceCounter             iDebounceCounter
+0000002A:00000008             gbl_iDebounceTicks               iDebounceTicks
+0000002B:00000008             CompTempVar548                  
+0000002C:00000008             CompTempVar549                  
+0000002D:00000008             interrupt_2_readgpio             readgpio
+0000005F:00000008             Int1Context                      Int1Context
+00000081:00000008             gbl_option_reg                   option_reg
+00000085:00000008             gbl_trisio                       trisio
+0000008C:00000008             gbl_pie1                         pie1
+0000008E:00000008             gbl_pcon                         pcon
+00000090:00000008             gbl_osccal                       osccal
+00000095:00000008             gbl_wpu                          wpu
+00000096:00000008             gbl_iocb                         iocb
+00000099:00000008             gbl_vrcon                        vrcon
+0000009A:00000008             gbl_eedata                       eedata
+0000009B:00000008             gbl_eeadr                        eeadr
+0000009C:00000008             gbl_eecon1                       eecon1
+0000009D:00000008             gbl_eecon2                       eecon2
+0000009E:00000008             gbl_adresl                       adresl
+0000009F:00000008             gbl_ansel                        ansel
+
+
+Memory Usage Report
+===================
+RAM available:64 bytes, used:15 bytes (23.5%), free:49 bytes (76.5%), 
+Heap size:49 bytes, Heap max single alloc:48 bytes
+ROM available:1024 words, used:241 words (23.6%), free:783 words (76.4%)

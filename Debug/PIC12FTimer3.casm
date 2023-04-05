@@ -1,0 +1,592 @@
+;/////////////////////////////////////////////////////////////////////////////////
+;// Code Generator: BoostC Compiler - http://www.sourceboost.com
+;// Version       : 8.01
+;// License Type  : Pro License
+;// Limitations   : PIC12,PIC16 max code size:Unlimited, max RAM banks:Unlimited
+;/////////////////////////////////////////////////////////////////////////////////
+
+/************************************************************************************************
+  Code from www.electro-dan.co.uk - please credit me
+  Free to use, modify and distribute
+  NO WARRANTY
+************************************************************************************************/
+
+#include <system.h>
+#include "PIC12FTimer3.h"
+
+//Target PIC12F675 configuration word
+#pragma DATA _CONFIG, _PWRTE_ON & _WDT_OFF & _INTRC_OSC_NOCLKOUT & _CPD_OFF & _CP_OFF & _MCLRE_OFF & _BODEN_ON
+
+//Set clock frequency
+#pragma CLOCK_FREQ	4000000
+
+
+void interrupt() {
+
+    // Handle interrupt-on-change - button press
+    if (intcon.GPIF && intcon.GPIE) {
+00B1  1283  	BCF STATUS, RP0
+00B2  1C0B  	BTFSS gbl_intcon,0
+00B3  28BB  	GOTO	label17
+00B4  1D8B  	BTFSS gbl_intcon,3
+00B5  28BB  	GOTO	label17
+00BB        label17
+
+        // Debounce - start timer0
+        cTask.TASK_INT_IOC = 1;
+00B6  1426  	BSF gbl_cTask,0
+
+        // read gpio
+        char readgpio = gpio;
+00B7  0805  	MOVF gbl_gpio, W
+00B8  00AA  	MOVWF interrupt_2_readgpio
+
+        intcon.GPIF = 0; // Clear interrupt flag
+00B9  100B  	BCF gbl_intcon,0
+
+        intcon.GPIE = 0; // Disable interrupt (for de-bouncing)
+00BA  118B  	BCF gbl_intcon,3
+
+    }
+
+    // Handle timer0 interrupt - button debounce
+    if(intcon.T0IF && intcon.T0IE) {
+00BB  1D0B  	BTFSS gbl_intcon,2
+00BC  28C4  	GOTO	label18
+00BD  1E8B  	BTFSS gbl_intcon,5
+00BE  28C4  	GOTO	label18
+00C4        label18
+
+        tmr0 = TMR0PRESET; // preset for timer0 register
+00BF  303D  	MOVLW 0x3D
+00C0  0081  	MOVWF gbl_tmr0
+
+        iDebounceCounter++;
+00C1  0AA7  	INCF gbl_iDebounceCounter, F
+
+        intcon.T0IF = 0; // Clear interrupt flag
+00C2  110B  	BCF gbl_intcon,2
+
+        cTask.TASK_TIMER0 = 1;
+00C3  14A6  	BSF gbl_cTask,1
+
+    }
+    
+    // Handle timer1 interrupt - delay counter
+    if (pir1.TMR1IF && pie1.TMR1IE) {
+00C4  1C0C  	BTFSS gbl_pir1,0
+00C5  28D7  	GOTO	label20
+00C6  1683  	BSF STATUS, RP0
+00C7  1C0C  	BTFSS gbl_pie1,0
+00C8  28D7  	GOTO	label20
+00D7        label20
+
+        tmr1h = TMR1HV;      // preset for timer1 MSB register
+00C9  30FF  	MOVLW 0xFF
+00CA  1283  	BCF STATUS, RP0
+00CB  008F  	MOVWF gbl_tmr1h
+
+        tmr1l = TMR1LV;      // preset for timer1 LSB register
+00CC  30CE  	MOVLW 0xCE
+00CD  008E  	MOVWF gbl_tmr1l
+
+
+        // Tick seconds
+        iSec++;
+00CE  0AA3  	INCF gbl_iSec, F
+
+        if (iSec >= 60) {
+00CF  303C  	MOVLW 0x3C
+00D0  0223  	SUBWF gbl_iSec, W
+00D1  1C03  	BTFSS STATUS,C
+00D2  28D5  	GOTO	label19
+00D5        label19
+
+            // Tick minutes
+            iMin++;
+00D3  0AA4  	INCF gbl_iMin, F
+
+            iSec = 0;
+00D4  01A3  	CLRF gbl_iSec
+
+        }
+        pir1.TMR1IF = 0;     // Clear interrupt flag
+00D5  100C  	BCF gbl_pir1,0
+
+        cTask.TASK_TIMER1 = 1;
+00D6  1526  	BSF gbl_cTask,2
+
+    }
+}
+00D7  1283  	BCF STATUS, RP0
+00D8  0E22  	SWAPF Int1BContext+D'2', W
+00D9  0084  	MOVWF FSR
+00DA  0E21  	SWAPF Int1BContext+D'1', W
+00DB  008A  	MOVWF PCLATH
+00DC  0E20  	SWAPF Int1BContext, W
+00DD  0083  	MOVWF STATUS
+00DE  0EDF  	SWAPF Int1Context, F
+00DF  0E5F  	SWAPF Int1Context, W
+00E0  0009  	RETFIE
+
+
+void initialise() {
+
+    // GP0 = OUT: LED1
+    // GP1 = OUT: LED2
+    // GP2 = OUT: Relay trigger
+    // GP3 = IN: push button
+    // GP4 = OUT: LED3 or OSC2: 32kHz crystal
+    // GP5 = N/A, T1 in or OSC1: 32kHz crystal
+    trisio = 0b00001000;
+0010  3008  	MOVLW 0x08
+0011  1683  	BSF STATUS, RP0
+0012  0085  	MOVWF gbl_trisio
+
+    gpio = 0b00001000; // all LEDs/outputs off by default
+0013  1283  	BCF STATUS, RP0
+0014  0085  	MOVWF gbl_gpio
+
+
+    ansel = 0; // configure A/D inputs as digital I/O
+0015  1683  	BSF STATUS, RP0
+0016  019F  	CLRF gbl_ansel
+
+    cmcon = 7; // compartor off
+0017  3007  	MOVLW 0x07
+0018  1283  	BCF STATUS, RP0
+0019  0099  	MOVWF gbl_cmcon
+
+
+    // OPTION register - for TMR0 and Weak pull-ups config
+    // Bit 7 NOT_GPPU = 1 : disable pull ups
+    // Bit 5 T0CS = 0: TMR0 Clock Source Select bit...0 = Internal Clock (CLKO) 1 = Transition on T0CKI pin
+    // Bit 4 T0SE = 0: TMR0 Source Edge Select bit 0 = low/high 1 = high/low
+    // Bit 3 PSA = 0: Prescaler Assignment bit...0 = Prescaler is assigned to the Timer0
+    // Bits 2-0 PS2:PS0 = 111: Prescaler Rate Select bits, 111 = 1:256 prescaler
+    option_reg = 0x1000111; 
+001A  3011  	MOVLW 0x11
+001B  1683  	BSF STATUS, RP0
+001C  0081  	MOVWF gbl_option_reg
+
+    //Timer0 Registers Prescaler= 256 - TMR0 Preset = 61 - Freq = 20.03 Hz - Period = 0.049920 seconds
+    tmr0 = TMR0PRESET; // preset for timer0 register
+001D  303D  	MOVLW 0x3D
+001E  1283  	BCF STATUS, RP0
+001F  0081  	MOVWF gbl_tmr0
+
+    
+    // Timer 1 setup - interrupt on AC 50Hz
+    // Timer1 Registers Prescaler= 1 - TMR1 Preset = 65486 - Freq = 1 Hz from 50Hz
+    // Bits 5-4 T1CKPS1:T1CKPS0 = 00: Prescaler Rate Select bits, 00 = 1:1 prescaler
+    // Bit 3 T1OSCEN = 0: Timer1 LP Oscillator Enable Control bit, 0 = off
+    // Bit 2 NOT_T1SYNC = 1: Timer1 External Clock Input Synchronization Control bit, 1 = Do not synchronize external clock input
+    // Bit 1 TMR1CS = 1: Timer1 Clock Source Select bit, 1 = External clock from T1OSO/T1CKI pin (on the rising edge)
+    // Bit 0 TMR1ON = 0: Timer1 On Bit, 0 = off
+    t1con = 0b00000110;
+0020  3006  	MOVLW 0x06
+0021  0090  	MOVWF gbl_t1con
+
+    tmr1h = TMR1HV;      // preset for timer1 MSB register
+0022  30FF  	MOVLW 0xFF
+0023  008F  	MOVWF gbl_tmr1h
+
+    tmr1l = TMR1LV;      // preset for timer1 LSB register
+0024  30CE  	MOVLW 0xCE
+0025  008E  	MOVWF gbl_tmr1l
+
+    pie1.TMR1IE = 1;     // Timer 1 interrupt
+0026  1683  	BSF STATUS, RP0
+0027  140C  	BSF gbl_pie1,0
+
+    
+    // Setup for GP3 Interrupt [Button press]
+    ioc.IOC3 = 1; // GP3 interrupt on change
+0028  1596  	BSF gbl_ioc,3
+
+    intcon.GPIE = 1; // GP3/RB0 Interrupt enabled (for button)
+0029  1283  	BCF STATUS, RP0
+002A  158B  	BSF gbl_intcon,3
+
+    
+    // No task at initialisation
+    cTask = 0;
+002B  01A6  	CLRF gbl_cTask
+
+    iDebounceCounter = 0;
+002C  01A7  	CLRF gbl_iDebounceCounter
+
+    iSetTime = 0;
+002D  01A5  	CLRF gbl_iSetTime
+
+    iSec = 0;
+002E  01A3  	CLRF gbl_iSec
+
+    iMin = 0;
+002F  01A4  	CLRF gbl_iMin
+
+    
+    // Enable interrupts
+    intcon.GIE = 1;
+0030  178B  	BSF gbl_intcon,7
+
+    intcon.PEIE = 1;
+0031  170B  	BSF gbl_intcon,6
+
+}
+0032  0008  	RETURN
+
+
+
+void main() {
+
+    initialise();
+0033  2010  	CALL initialise_00000
+
+
+    // Endless loop
+    while(1) {
+0034        label1
+00AD  2834  	GOTO	label1
+
+        if (cTask.TASK_INT_IOC) {
+0034  1C26  	BTFSS gbl_cTask,0
+0035  283B  	GOTO	label2
+003B        label2
+
+            // Interrupt-on-change occured - start timer 0
+            // Reset timer 0
+            tmr0 = TMR0PRESET;
+0036  303D  	MOVLW 0x3D
+0037  0081  	MOVWF gbl_tmr0
+
+            // Enable timer 0 interrupt
+            intcon.T0IE = 1;
+0038  168B  	BSF gbl_intcon,5
+
+            cTask.TASK_INT_IOC = 0;
+0039  1026  	BCF gbl_cTask,0
+
+        } else if (cTask.TASK_TIMER0) {
+003A  2878  	GOTO	label10
+003B  1CA6  	BTFSS gbl_cTask,1
+003C  2878  	GOTO	label10
+0078        label10
+
+            // Timer complete
+            // if debounce counter is 1, check state is still on
+            if ((iDebounceCounter == 1) && (!BUTTON)) {
+003D  0327  	DECF gbl_iDebounceCounter, W
+003E  1D03  	BTFSS STATUS,Z
+003F  286E  	GOTO	label8
+0040  1985  	BTFSC gbl_gpio,3
+0041  286E  	GOTO	label8
+006E        label8
+
+                // Button still pressed and debounced, set a timer
+                if (iSetTime == 0) {
+0042  08A5  	MOVF gbl_iSetTime, F
+0043  1D03  	BTFSS STATUS,Z
+0044  284B  	GOTO	label3
+004B        label3
+
+                    iSetTime = TIME1;
+0045  3001  	MOVLW 0x01
+0046  00A5  	MOVWF gbl_iSetTime
+
+                    // Green LED
+                    RED = 0;
+0047  1205  	BCF gbl_gpio,4
+
+                    YELLOW = 0;
+0048  1005  	BCF gbl_gpio,0
+
+                    GREEN = 1;
+0049  1485  	BSF gbl_gpio,1
+
+                } else if (iSetTime == TIME1) {
+004A  2862  	GOTO	label6
+004B  0325  	DECF gbl_iSetTime, W
+004C  1D03  	BTFSS STATUS,Z
+004D  2854  	GOTO	label4
+0054        label4
+
+                    iSetTime = TIME2;
+004E  3002  	MOVLW 0x02
+004F  00A5  	MOVWF gbl_iSetTime
+
+                    // Yellow LED
+                    RED = 0;
+0050  1205  	BCF gbl_gpio,4
+
+                    YELLOW = 1;
+0051  1405  	BSF gbl_gpio,0
+
+                    GREEN = 0;
+0052  1085  	BCF gbl_gpio,1
+
+                } else if (iSetTime == TIME2) {
+0053  2862  	GOTO	label6
+0054  0825  	MOVF gbl_iSetTime, W
+0055  3A02  	XORLW 0x02
+0056  1D03  	BTFSS STATUS,Z
+0057  285E  	GOTO	label5
+005E        label5
+
+                    iSetTime = TIME3;
+0058  3003  	MOVLW 0x03
+0059  00A5  	MOVWF gbl_iSetTime
+
+                    // Red LED
+                    RED = 1;
+005A  1605  	BSF gbl_gpio,4
+
+                    YELLOW = 0;
+005B  1005  	BCF gbl_gpio,0
+
+                    GREEN = 0;
+005C  1085  	BCF gbl_gpio,1
+
+                } else {
+005D  2862  	GOTO	label6
+0062        label6
+
+                    iSetTime = 0;
+005E  01A5  	CLRF gbl_iSetTime
+
+                    // Off LEDs
+                    RED = 0;
+005F  1205  	BCF gbl_gpio,4
+
+                    YELLOW = 0;
+0060  1005  	BCF gbl_gpio,0
+
+                    GREEN = 0;
+0061  1085  	BCF gbl_gpio,1
+
+                }
+                    
+                if (iSetTime > 0) {
+0062  0825  	MOVF gbl_iSetTime, W
+0063  3C00  	SUBLW 0x00
+0064  1803  	BTFSC STATUS,C
+0065  2869  	GOTO	label7
+0069        label7
+
+                    // On relay and enable timer 1
+                    RELAY = 1;
+0066  1505  	BSF gbl_gpio,2
+
+                    t1con.TMR1ON = 1; // Enable Timer 1
+0067  1410  	BSF gbl_t1con,0
+
+                } else {
+0068  2877  	GOTO	label9
+
+                    // Off relay, disable timer 1
+                    RELAY = 0;
+0069  1105  	BCF gbl_gpio,2
+
+                    iSec = 0;
+006A  01A3  	CLRF gbl_iSec
+
+                    iMin = 0;
+006B  01A4  	CLRF gbl_iMin
+
+                    t1con.TMR1ON = 0; // Disable Timer 1
+006C  1010  	BCF gbl_t1con,0
+
+                }
+            } else if ((iDebounceCounter > 2) && (BUTTON)) {
+006D  2877  	GOTO	label9
+006E  0827  	MOVF gbl_iDebounceCounter, W
+006F  3C02  	SUBLW 0x02
+0070  1803  	BTFSC STATUS,C
+0071  2877  	GOTO	label9
+0072  1D85  	BTFSS gbl_gpio,3
+0073  2877  	GOTO	label9
+0077        label9
+
+                // Button released, interrupt can be enabled again
+                intcon.GPIE = 1; // Enable interrupt
+0074  158B  	BSF gbl_intcon,3
+
+                intcon.T0IE = 0; // Disable timer 0 interrupt
+0075  128B  	BCF gbl_intcon,5
+
+                iDebounceCounter = 0;
+0076  01A7  	CLRF gbl_iDebounceCounter
+
+            }
+            cTask.TASK_TIMER0 = 0;
+0077  10A6  	BCF gbl_cTask,1
+
+        }
+        
+        if (cTask.TASK_TIMER1) {			
+0078  1D26  	BTFSS gbl_cTask,2
+0079  28A6  	GOTO	label15
+00A6        label15
+
+            
+            // Change LEDs based on minutes left
+            if ((iSetTime - iMin) > TIME2) {
+007A  0824  	MOVF gbl_iMin, W
+007B  0225  	SUBWF gbl_iSetTime, W
+007C  00A8  	MOVWF CompTempVar548
+007D  0828  	MOVF CompTempVar548, W
+007E  3C02  	SUBLW 0x02
+007F  1803  	BTFSC STATUS,C
+0080  2887  	GOTO	label11
+0087        label11
+
+                RED ^= 1; // toggle the red LED
+0081  0805  	MOVF gbl_gpio, W
+0082  3A10  	XORLW 0x10
+0083  0085  	MOVWF gbl_gpio
+
+                YELLOW = 0;
+0084  1005  	BCF gbl_gpio,0
+
+                GREEN = 0;
+0085  1085  	BCF gbl_gpio,1
+
+            } else if ((iSetTime - iMin) > TIME1) {
+0086  2899  	GOTO	label13
+0087  0824  	MOVF gbl_iMin, W
+0088  0225  	SUBWF gbl_iSetTime, W
+0089  00A9  	MOVWF CompTempVar549
+008A  0829  	MOVF CompTempVar549, W
+008B  3C01  	SUBLW 0x01
+008C  1803  	BTFSC STATUS,C
+008D  2894  	GOTO	label12
+0094        label12
+
+                RED = 0;
+008E  1205  	BCF gbl_gpio,4
+
+                YELLOW ^= 1; // toggle the yellow LED
+008F  0805  	MOVF gbl_gpio, W
+0090  3A01  	XORLW 0x01
+0091  0085  	MOVWF gbl_gpio
+
+                GREEN = 0;
+0092  1085  	BCF gbl_gpio,1
+
+            } else {
+0093  2899  	GOTO	label13
+0099        label13
+
+                RED = 0;
+0094  1205  	BCF gbl_gpio,4
+
+                YELLOW = 0;
+0095  1005  	BCF gbl_gpio,0
+
+                GREEN ^= 1;  // toggle the green LED
+0096  0805  	MOVF gbl_gpio, W
+0097  3A02  	XORLW 0x02
+0098  0085  	MOVWF gbl_gpio
+
+            }
+            
+            
+            // Check if iMin reached setting
+            if (iMin >= iSetTime) {
+0099  0825  	MOVF gbl_iSetTime, W
+009A  0224  	SUBWF gbl_iMin, W
+009B  1C03  	BTFSS STATUS,C
+009C  28A5  	GOTO	label14
+00A5        label14
+
+                // Time reached, switch off relay and reset
+                RELAY = 0;
+009D  1105  	BCF gbl_gpio,2
+
+                // Reset time
+                iSec = 0;
+009E  01A3  	CLRF gbl_iSec
+
+                iMin = 0;
+009F  01A4  	CLRF gbl_iMin
+
+                iSetTime = 0;
+00A0  01A5  	CLRF gbl_iSetTime
+
+                // Off LEDs
+                RED = 0;
+00A1  1205  	BCF gbl_gpio,4
+
+                YELLOW = 0;
+00A2  1005  	BCF gbl_gpio,0
+
+                GREEN = 0;
+00A3  1085  	BCF gbl_gpio,1
+
+                // Off timer
+                t1con.TMR1ON = 0;
+00A4  1010  	BCF gbl_t1con,0
+
+            }
+            cTask.TASK_TIMER1 = 0;
+00A5  1126  	BCF gbl_cTask,2
+
+        } 
+        if (!t1con.TMR1ON && !intcon.T0IE) {
+00A6  1810  	BTFSC gbl_t1con,0
+00A7  2834  	GOTO	label1
+00A8  1A8B  	BTFSC gbl_intcon,5
+00A9  2834  	GOTO	label1
+
+            // We can only sleep if the timers are off
+            intcon.GPIE = 1; // ensure the button press interrupt is enabled
+00AA  158B  	BSF gbl_intcon,3
+
+            sleep();
+00AB  0063  	SLEEP
+
+            nop(); // NOP must occur after wake up
+00AC  0000  	NOP
+
+        }
+    }
+}
+
+
+////////////////////////////////////////
+// Code with no source :-)
+////////////////////////////////////////
+0000  28AE  	GOTO	_startup
+
+0004  00DF  	MOVWF Int1Context
+0005  0E03  	SWAPF STATUS, W
+0006  1283  	BCF STATUS, RP0
+0007  00A0  	MOVWF Int1BContext
+0008  0E0A  	SWAPF PCLATH, W
+0009  00A1  	MOVWF Int1BContext+D'1'
+000A  0E04  	SWAPF FSR, W
+000B  00A2  	MOVWF Int1BContext+D'2'
+000C  118A  	BCF PCLATH,3
+000D  120A  	BCF PCLATH,4
+000E  28B1  	GOTO	interrupt
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+00AE        _startup
+00AE  118A  	BCF PCLATH,3
+00AF  120A  	BCF PCLATH,4
+00B0  2833  	GOTO	main
+
+2007  3FC4  	DW 0x3FC4

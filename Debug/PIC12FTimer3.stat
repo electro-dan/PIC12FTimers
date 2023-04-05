@@ -1,0 +1,8 @@
+// SourceBoost Linker Function Resource Usage Dump
+
+#GLOBAL:"global",line = 0,ram = 9.0,rom = 0;
+interrupt(void):"Z:\home\dan\PIC\PIC12FTimers\PIC12FTimer3.c",line = 19,ram = 1.0,rom = 48;
+initialise(void):"Z:\home\dan\PIC\PIC12FTimers\PIC12FTimer3.c",line = 60,ram = 0.0,rom = 35;
+main(void):"Z:\home\dan\PIC\PIC12FTimers\PIC12FTimer3.c",line = 106,ram = 2.0,rom = 123;
+_startup(void):"NoSourceFile",line = 0,ram = 0.0,rom = 3;
+#HEAP_BLOCK: 0, 43, 52;
